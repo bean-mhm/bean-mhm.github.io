@@ -1,0 +1,56 @@
+/* Deep-purple Dark scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme="dark"] {
+  --primary: #5e35b1;
+  --primary-hover: #673ab7;
+  --primary-focus: rgba(94, 53, 177, 0.25);
+  --primary-inverse: #FFF;
+}
+
+@font-face {
+  font-family: Signika;
+  src: url(../fonts/Signika/Signika-VariableFont_GRAD\,wght.ttf);
+}
+
+@font-face {
+  font-family: ElMessiri-Bold;
+  src: url(../fonts/El_Messiri/static/ElMessiri-Bold.ttf);
+}
+
+@font-face {
+  font-family: ElMessiri-SemiBold;
+  src: url(../fonts/El_Messiri/static/ElMessiri-SemiBold.ttf);
+}
+
+:root {
+  --font-family: Signika, system-ui, sans-serif;
+}
+
+.blog-info-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: flex-start;
+  height: fit-content;
+}
+
+.blog-icon {
+  height: 4.2rem;
+  aspect-ratio: 1/1;
+  margin-right: 1rem;
+}
+
+.blog-name {
+  --font-family: ElMessiri-Bold, system-ui, sans-serif;
+  margin-bottom: 0.1rem;
+}
+
+.blog-desc {
+  --font-family: ElMessiri-SemiBold, system-ui, sans-serif;
+  margin-bottom: 0.0rem;
+}
+
+* {
+  --typography-spacing-vertical: 1.3rem !important;
+}
