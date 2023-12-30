@@ -1,3 +1,4 @@
+# site root directory
 $-root dir-$ = path("../docs")
 
 $-blog name-$ = "bean's website"
