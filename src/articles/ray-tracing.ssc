@@ -1,4 +1,7 @@
-include("article.ssc")
+include("global.ssc")
+
+$--out filename--$ = "$-root dir-$/articles/$--filename--$.html"
+$--out content--$ = file("template.html")
 
 $-article title-$ = "Ray Tracing"
 
