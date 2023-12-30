@@ -26,7 +26,7 @@ def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
 
 
 # returns (pos, eof, buf)
-def append_char(f, pos, buf: TokenPos) -> (TokenPos, bool, str):
+def append_char(f, pos: TokenPos, buf: str) -> (TokenPos, bool, str):
     new_pos, eof, new_buf = read_char(f, pos)
     return (new_pos, eof, buf + new_buf)
 
