@@ -1,7 +1,4 @@
-$--include--$ = ["global.ssc"]
+include("global.ssc")
 
 $--out filename--$ = "$-root dir-$/articles/$--filename noext--$.html"
 $--out content--$ = file("template.html")
-
-$--pre build--$ = "command"
-$--post build--$ = "command"

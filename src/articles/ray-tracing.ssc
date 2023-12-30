@@ -1,4 +1,4 @@
-$--include--$ = ["article.ssc"]
+include("article.ssc")
 
 $-article title-$ = "Ray Tracing"
 
