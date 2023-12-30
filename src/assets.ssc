@@ -1,1 +1,1 @@
-$--post build--$ = "del /s /y \"$-root dir-$\\*" & xcopy \".\\assets\\" "$-root dir-$\\assets\\" /s /y"
+$--post build--$ = "del /s /y \"$-root dir-$\\*\" & xcopy \".\\assets\\" "$-root dir-$\\assets\\" /s /y"
