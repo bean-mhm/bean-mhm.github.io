@@ -1,0 +1,16 @@
+$--include--$ = ["article.ssc"]
+
+$-article title-$ = "Ray Tracing"
+
+$-article contents-$ = "
+<p>
+  blah blah blah \"double quotes\"
+  bling blung
+</p>
+
+<h2>Ray-Sphere Intersection</h2>
+<p>
+  blah blah blah
+  bling blung
+</p>
+"

@@ -1,7 +1,7 @@
-$-blog name-$ = bean's website
+$-root dir-$ = path("../docs")
+
+$-blog name-$ = "bean's website"
 $-blog desc-$ = "personal blog about stuff"
 
-$-blog icon url-$ = $--root path--$icon.png
+$-blog icon url-$ = "$-root dir-$/icon.png"
 $-blog icon alt-$ = "blog icon"
-
-$-template article-$ = file("template-article.html")
