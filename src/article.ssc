@@ -1,0 +1,20 @@
+$--include--$ = ["global.ssc", "yet-another-config.ssc"]
+
+$--out content--$ = "$-template article-$"
+$--out filename--$ = "$--filename noext--$.html"
+
+$-article title-$ = "Ray Tracing"
+
+$-article contents-$ = "
+<p>
+  blah blah blah
+  bling blung
+</p>
+
+<h2>ray-sphere intersection</h2>
+
+<p>
+  blah blah blah
+  bling blung
+</p>
+"
