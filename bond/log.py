@@ -7,7 +7,7 @@ class LogLevel(Enum):
     Info = 2
     Verbose = 3
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self == LogLevel.Error:
             return '[E]'
         if self == LogLevel.Warning:
@@ -27,28 +27,28 @@ def set_max_log_level(level: LogLevel):
     log_level = level
 
 
-def log(level: LogLevel, message, details={}):
+def log(level: LogLevel, message, extra: list = []):
     if level.value > max_log_level.value:
         return
 
     s_details = ''
-    for key, value in details.items():
-        s_details += f'[{key}={value}] '
+    for item in extra:
+        s_details += f'[{item}] '
 
     print(f'{level} {s_details}{message}')
 
 
-def error(message, details={}):
-    log(LogLevel.Error, message, details)
+def error(message, extra: list = []):
+    log(LogLevel.Error, message, extra)
 
 
-def warning(message, details={}):
-    log(LogLevel.Warning, message, details)
+def warning(message, extra: list = []):
+    log(LogLevel.Warning, message, extra)
 
 
-def info(message, details={}):
-    log(LogLevel.Info, message, details)
+def info(message, extra: list = []):
+    log(LogLevel.Info, message, extra)
 
 
-def verbose(message, details={}):
-    log(LogLevel.Verbose, message, details)
+def verbose(message, extra: list = []):
+    log(LogLevel.Verbose, message, extra)
