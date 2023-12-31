@@ -1,7 +1,10 @@
 import os
-import pathlib
+import copy
+
+# internal files
 import log
-from classes import *
+from tokens import *
+from utils import *
 
 
 # returns (pos, eof, buf)
@@ -10,15 +13,11 @@ def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
     if not buf:
         return (pos, True, '')
     else:
-        if buf.endswith('\r'):
-            buf += f.read(1)
-            if buf.endswith('\r\n'):
-                pos.line += 1
-                pos.col = 1
-            buf = buf[1:]
-        elif buf.endswith('\n'):
+        if buf[-1] == '\r':
+            return read_char(f, pos)
+        elif buf[-1] == '\n':
             pos.line += 1
-            pos.col = 1
+            pos.col = 0
         else:
             pos.col += 1
 
@@ -27,57 +26,157 @@ def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
 
 # returns (pos, eof, buf)
 def append_char(f, pos: TokenPos, buf: str) -> (TokenPos, bool, str):
-    new_pos, eof, new_buf = read_char(f, pos)
-    return (new_pos, eof, buf + new_buf)
+    pos, eof, new_buf = read_char(f, pos)
+    return (pos, eof, buf + new_buf)
 
 
-def parse_file(f) -> ParseResult:
-    details = {'pos': TokenPos(1, 1)}
+def log_eof(extra: list = []):
+    log.info('end of file', extra)
+
+
+def log_unexpected_eof(extra: list = []):
+    log.error('unexpected end of file', extra)
+
+
+def log_invalid_id(extra: list = []):
+    log.error('invalid identifier', extra)
+
+
+def log_invalid_var_name(extra: list = []):
+    log.error('invalid variable name', extra)
+
+
+def parse(f) -> ParseResult:
+    pos = TokenPos()
     result = ParseResult()
 
     while True:
-        details['pos'], eof, buf = read_char(f, details['pos'])
+        pos, eof, buf = read_char(f, pos)
         if eof:
-            log.info('end of file', details)
-            return result
+            log_eof([pos])
+            break
 
         if buf.isspace():
             continue
 
         if buf == '#':
+            eof = False
             while True:
-                details['pos'], eof, buf = read_char(f, details['pos'])
+                pos, eof, buf = read_char(f, pos)
                 if eof:
-                    log.info('end of file', details)
-                    return result
-                elif (buf == '\n'):
+                    log_eof([pos])
+                    break
+                elif buf == '\n':
                     break
 
-            continue
+            if eof:
+                break
+            else:
+                continue
 
         if buf == '$':
-            details['pos'], eof, buf = append_char(f, details['pos'], buf)
+            start_pos = copy.deepcopy(pos)
+            pos, eof, buf = append_char(f, pos, buf)
             if eof:
-                log.error('unexpected end of file', details)
+                log_unexpected_eof([pos])
                 return result
             elif not buf.startswith('$-'):
-                log.error('expected \'-\' after \'$\'', details)
+                log.error('expected \'-\' after \'$\'', [pos])
                 return result
 
             while True:
-                details['pos'], eof, buf = append_char(f, details['pos'], buf)
+                pos, eof, buf = append_char(f, pos, buf)
                 if eof:
-                    log.error('unexpected end of file', details)
+                    log_unexpected_eof([pos])
                     return result
-                elif (buf.endswith('-$')):
+                elif buf.endswith('-$'):
                     break
 
-            var = VarToken(details['pos'], buf)
-            log.verbose(f'read var name {buf}', details)
+            if not is_valid_var_name(buf):
+                log_invalid_var_name([start_pos])
+                return result
 
+            result.parse_tokens.append(VarParseToken(start_pos, buf))
+            continue
+
+        if buf == '=':
+            result.parse_tokens.append(EqualSignParseToken(pos))
+            continue
+
+        if buf == '"':
+            start_pos = copy.deepcopy(pos)
+            while True:
+                pos, eof, buf = append_char(f, pos, buf)
+                if eof:
+                    log_unexpected_eof([pos])
+                    return result
+                elif buf[-1] == '\\':
+                    pos, eof, buf = append_char(f, pos, buf)
+                    if eof:
+                        log_unexpected_eof([pos])
+                        return result
+                    elif buf[-1] == 'a':
+                        buf = buf[:-2] + '\a'
+                    elif buf[-1] == 'b':
+                        buf = buf[:-2] + '\b'
+                    elif buf[-1] == 'f':
+                        buf = buf[:-2] + '\f'
+                    elif buf[-1] == 'n':
+                        buf = buf[:-2] + '\n'
+                    elif buf[-1] == 'r':
+                        buf = buf[:-2] + '\r'
+                    elif buf[-1] == 't':
+                        buf = buf[:-2] + '\t'
+                    elif buf[-1] == 'v':
+                        buf = buf[:-2] + '\v'
+                    elif buf[-1].lower() == 'u':
+                        n_digits = 4
+                        if buf[-1] == 'U':
+                            n_digits = 8
+
+                        hex_start_pos = copy.deepcopy(pos)
+                        hex = ''
+                        for _ in range(n_digits):
+                            pos, eof, hex = append_char(f, pos, hex)
+                            if eof:
+                                log_unexpected_eof([pos])
+                                return result
+                        if not is_hex(hex):
+                            log.error(
+                                f'expected {n_digits}-digit hex code after \'\\u\'',
+                                [hex_start_pos]
+                            )
+                            return result
+
+                        actual_unicode_char = chr(int(hex, 16))
+                        buf = buf[:-2] + actual_unicode_char
+                    else:
+                        buf = buf[:-2] + buf[-1]
+                elif buf[-1] == '"':
+                    break
+
+            s = buf[1:-1]
+            if s[0] == '\n':
+                s = s[1:]
+            if s[-1] == '\n':
+                s = s[:-1]
+            result.parse_tokens.append(StringLiteralParseToken(start_pos, s))
+            continue
+
+    result.ok = True
     return result
 
 
+def process(path: str):
+    with open(path, mode='r', encoding="utf8") as f:
+        # parse
+        parse_result: ParseResult = parse(f)
+        print(parse_result)
+
+        # TODO build syntax tree
+
+        # TODO compile
+
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
-with open(f'{script_dir}/../src/articles/ray-tracing.ssc', 'r') as f:
-    parse_file(f)
+process(f'{script_dir}/../src/articles/ray-tracing.ssc')
