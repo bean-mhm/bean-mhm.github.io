@@ -1,14 +1,14 @@
 import os
 import copy
 
-# internal files
 import log
-from tokens import *
-from utils import *
+import tokens
+import syntax_tree
+import utils
 
 
 # returns (pos, eof, buf)
-def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
+def read_char(f, pos: tokens.TokenPos) -> (tokens.TokenPos, bool, str):
     buf = f.read(1)
     if not buf:
         return (pos, True, '')
@@ -25,7 +25,7 @@ def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
 
 
 # returns (pos, eof, buf)
-def append_char(f, pos: TokenPos, buf: str) -> (TokenPos, bool, str):
+def append_char(f, pos: tokens.TokenPos, buf: str) -> (tokens.TokenPos, bool, str):
     pos, eof, new_buf = read_char(f, pos)
     return (pos, eof, buf + new_buf)
 
@@ -50,9 +50,10 @@ def log_invalid_function_name(extra: list = []):
     log.error('invalid function name', extra)
 
 
-def parse(f) -> ParseResult:
-    pos = TokenPos()
-    result = ParseResult()
+# Extract tokens in sequential order and with no tree-like or recursive structure
+def tokenize(f) -> tokens.TokenizationResult:
+    pos = tokens.TokenPos()
+    result = tokens.TokenizationResult()
 
     while True:
         pos, eof, buf = read_char(f, pos)
@@ -98,16 +99,16 @@ def parse(f) -> ParseResult:
                 elif buf.endswith('-$'):
                     break
 
-            if not is_valid_var_name(buf):
+            if not utils.is_valid_var_name(buf):
                 log_invalid_var_name([start_pos])
                 return result
 
-            result.parse_tokens.append(VarParseToken(start_pos, buf))
+            result.tokens.append(tokens.VarToken(start_pos, buf))
             continue
 
         # equal sign
         elif buf == '=':
-            result.parse_tokens.append(EqualSignParseToken(pos))
+            result.tokens.append(tokens.EqualSignToken(pos))
             continue
 
         # string literal
@@ -149,7 +150,7 @@ def parse(f) -> ParseResult:
                             if eof:
                                 log_unexpected_eof([pos])
                                 return result
-                        if not is_hex(hex):
+                        if not utils.is_hex(hex):
                             log.error(
                                 f'expected {n_digits}-digit hex code after \'\\u\'',
                                 [hex_start_pos]
@@ -168,12 +169,12 @@ def parse(f) -> ParseResult:
                 s = s[1:]
             if s[-1] == '\n':
                 s = s[:-1]
-            result.parse_tokens.append(StringLiteralParseToken(start_pos, s))
+            result.tokens.append(tokens.StringLiteralToken(start_pos, s))
             continue
 
         # function call end
         elif buf == ')':
-            result.parse_tokens.append(FunctionCallEndParseToken(pos))
+            result.tokens.append(tokens.FunctionCallEndToken(pos))
             continue
 
         # function call start
@@ -188,11 +189,11 @@ def parse(f) -> ParseResult:
                     break
 
             s = buf[:-1]
-            if not is_valid_function_name(s):
+            if not utils.is_valid_function_name(s):
                 log_invalid_function_name([start_pos])
                 return result
 
-            result.parse_tokens.append(FunctionCallStartParseToken(start_pos, s))
+            result.tokens.append(tokens.FunctionCallStartToken(start_pos, s))
             continue
 
     result.ok = True
@@ -201,13 +202,12 @@ def parse(f) -> ParseResult:
 
 def process(path: str):
     with open(path, mode='r', encoding="utf8") as f:
-        # parse
-        parse_result: ParseResult = parse(f)
-        print(parse_result)
+        tokenization_result: tokens.TokenizationResult = tokenize(f)
+        print(tokenization_result)
 
-        # TODO build syntax tree
+        # TODO Build a recursive syntax tree
 
-        # TODO compile
+        # TODO Compile
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
