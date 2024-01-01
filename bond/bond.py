@@ -111,6 +111,11 @@ def tokenize(f) -> tokens.TokenizationResult:
             result.tokens.append(tokens.EqualSignToken(pos))
             continue
 
+        # comma
+        elif buf == ',':
+            result.tokens.append(tokens.CommaToken(pos))
+            continue
+
         # string literal
         elif buf == '"':
             start_pos = copy.deepcopy(pos)
@@ -195,6 +200,18 @@ def tokenize(f) -> tokens.TokenizationResult:
 
             result.tokens.append(tokens.FunctionCallStartToken(start_pos, s))
             continue
+
+    # join adjacent string literals
+    i = 0
+    while (i < len(result.tokens) - 1):
+        are_adjacent = isinstance(result.tokens[i], tokens.StringLiteralToken)\
+            and isinstance(result.tokens[i + 1], tokens.StringLiteralToken)
+
+        if are_adjacent:
+            result.tokens[i].value += result.tokens[i + 1].value
+            del result.tokens[i + 1]
+        else:
+            i += 1
 
     result.ok = True
     return result

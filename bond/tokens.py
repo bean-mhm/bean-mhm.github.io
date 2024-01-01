@@ -35,15 +35,7 @@ class EqualSignToken(Token):
         super().__init__(type(self).__name__, pos)
 
 
-class FunctionCallStartToken(Token):
-    name: str
-
-    def __init__(self, pos: TokenPos, name: str):
-        super().__init__(type(self).__name__, pos)
-        self.name = name
-
-
-class FunctionCallEndToken(Token):
+class CommaToken(Token):
     def __init__(self, pos: TokenPos):
         super().__init__(type(self).__name__, pos)
 
@@ -54,6 +46,19 @@ class StringLiteralToken(Token):
     def __init__(self, pos: TokenPos, value: str):
         super().__init__(type(self).__name__, pos)
         self.value = value
+
+
+class FunctionCallEndToken(Token):
+    def __init__(self, pos: TokenPos):
+        super().__init__(type(self).__name__, pos)
+
+
+class FunctionCallStartToken(Token):
+    name: str
+
+    def __init__(self, pos: TokenPos, name: str):
+        super().__init__(type(self).__name__, pos)
+        self.name = name
 
 
 class TokenizationResult:
