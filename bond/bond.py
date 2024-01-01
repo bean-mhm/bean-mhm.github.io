@@ -46,6 +46,10 @@ def log_invalid_var_name(extra: list = []):
     log.error('invalid variable name', extra)
 
 
+def log_invalid_function_name(extra: list = []):
+    log.error('invalid function name', extra)
+
+
 def parse(f) -> ParseResult:
     pos = TokenPos()
     result = ParseResult()
@@ -56,10 +60,11 @@ def parse(f) -> ParseResult:
             log_eof([pos])
             break
 
-        if buf.isspace():
+        elif buf.isspace():
             continue
 
-        if buf == '#':
+        # comment
+        elif buf == '#':
             eof = False
             while True:
                 pos, eof, buf = read_char(f, pos)
@@ -74,7 +79,8 @@ def parse(f) -> ParseResult:
             else:
                 continue
 
-        if buf == '$':
+        # variable
+        elif buf == '$':
             start_pos = copy.deepcopy(pos)
             pos, eof, buf = append_char(f, pos, buf)
             if eof:
@@ -99,11 +105,13 @@ def parse(f) -> ParseResult:
             result.parse_tokens.append(VarParseToken(start_pos, buf))
             continue
 
-        if buf == '=':
+        # equal sign
+        elif buf == '=':
             result.parse_tokens.append(EqualSignParseToken(pos))
             continue
 
-        if buf == '"':
+        # string literal
+        elif buf == '"':
             start_pos = copy.deepcopy(pos)
             while True:
                 pos, eof, buf = append_char(f, pos, buf)
@@ -161,6 +169,30 @@ def parse(f) -> ParseResult:
             if s[-1] == '\n':
                 s = s[:-1]
             result.parse_tokens.append(StringLiteralParseToken(start_pos, s))
+            continue
+
+        # function call end
+        elif buf == ')':
+            result.parse_tokens.append(FunctionCallEndParseToken(pos))
+            continue
+
+        # function call start
+        else:
+            start_pos = copy.deepcopy(pos)
+            while True:
+                pos, eof, buf = append_char(f, pos, buf)
+                if eof:
+                    log_unexpected_eof([pos])
+                    return result
+                elif buf[-1] == '(':
+                    break
+
+            s = buf[:-1]
+            if not is_valid_function_name(s):
+                log_invalid_function_name([start_pos])
+                return result
+
+            result.parse_tokens.append(FunctionCallStartParseToken(start_pos, s))
             continue
 
     result.ok = True
