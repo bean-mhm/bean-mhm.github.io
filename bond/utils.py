@@ -1,6 +1,7 @@
-valid_id_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_ '
 digit_chars = '0123456789'
 hex_chars = '0123456789ABCDEFabcdef'
+valid_var_name_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_ '
+valid_function_name_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
 
 
 def is_digit(s: str) -> bool:
@@ -17,7 +18,7 @@ def is_hex(s: str) -> bool:
     return True
 
 
-def is_valid_id(s: str) -> bool:
+def check_var_name_inner(s: str) -> bool:
     # can't be empty
     if s == '':
         return False
@@ -32,7 +33,7 @@ def is_valid_id(s: str) -> bool:
 
     # check if all else is valid
     for char in s:
-        if char not in valid_id_chars:
+        if char not in valid_var_name_chars:
             return False
 
     return True
@@ -48,7 +49,24 @@ def is_valid_var_name(s: str) -> bool:
         return False
 
     # check the inner content
-    if not is_valid_id(s[2:-2]):
+    if not check_var_name_inner(s[2:-2]):
         return False
+
+    return True
+
+
+def is_valid_function_name(s: str) -> bool:
+    # can't be empty
+    if s == '':
+        return False
+
+    # can't start with a digit
+    if s[0] in digit_chars:
+        return False
+
+    # check if all else is valid
+    for char in s:
+        if char not in valid_function_name_chars:
+            return False
 
     return True
