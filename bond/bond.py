@@ -219,6 +219,7 @@ def tokenize(f) -> tokens.TokenizationResult:
 
 def process(path: str):
     with open(path, mode='r', encoding="utf8") as f:
+        log.info('starting tokenization')
         tokenization_result: tokens.TokenizationResult = tokenize(f)
         print(tokenization_result)
 
