@@ -2,9 +2,11 @@ import copy
 import jsonpickle
 
 import tokens
+import log
 
 
 class Node:
+    type: str
     pos: tokens.TokenPos
 
     def __init__(self, type: str, pos: tokens.TokenPos):
@@ -56,3 +58,17 @@ class SyntaxTree:
 
     def __str__(self) -> str:
         return jsonpickle.encode(self.__dict__, unpicklable=False, indent=2)
+
+
+def build(tokenization_result: tokens.TokenizationResult) -> SyntaxTree:
+    log.info('building syntax tree')
+
+    result = SyntaxTree()
+
+    if not tokenization_result.ok:
+        log.error('tokenization result was not ok')
+        return result
+
+    tokens: list = tokenization_result.tokens
+
+    # TODO build syntax tree
