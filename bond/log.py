@@ -23,8 +23,8 @@ max_log_level = LogLevel.Verbose
 
 
 def set_max_log_level(level: LogLevel):
-    global log_level
-    log_level = level
+    global max_log_level
+    max_log_level = level
 
 
 def log(level: LogLevel, message, extra: list = []):
