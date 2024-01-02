@@ -31,7 +31,7 @@ def append_char(f, pos: tokens.TokenPos, buf: str) -> (tokens.TokenPos, bool, st
 
 
 def log_eof(extra: list = []):
-    log.info('end of file', extra)
+    log.verbose('end of file', extra)
 
 
 def log_unexpected_eof(extra: list = []):
