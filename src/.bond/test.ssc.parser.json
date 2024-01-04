@@ -1,0 +1,107 @@
+{
+  "ok": true,
+  "nodes": [
+    {
+      "type": "BinOp",
+      "left": {
+        "type": "Integer",
+        "value": 7
+      },
+      "op": "Asterisk",
+      "right": {
+        "type": "BinOp",
+        "left": {
+          "type": "BinOp",
+          "left": {
+            "type": "Integer",
+            "value": 9
+          },
+          "op": "Plus",
+          "right": {
+            "type": "BinOp",
+            "left": {
+              "type": "Integer",
+              "value": 4
+            },
+            "op": "Asterisk",
+            "right": {
+              "type": "BinOp",
+              "left": {
+                "type": "Integer",
+                "value": 2
+              },
+              "op": "Caret",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              }
+            }
+          }
+        },
+        "op": "Plus",
+        "right": {
+          "type": "Integer",
+          "value": 42
+        }
+      }
+    },
+    {
+      "type": "FnCall",
+      "name": "include",
+      "args": [
+        [
+          "../global.ssc"
+        ]
+      ]
+    },
+    {
+      "type": "Assignment",
+      "left": {
+        "type": "Var",
+        "name": "$--out filename--$"
+      },
+      "right": {
+        "type": "String",
+        "value": "$-root dir-$/articles/$--filename--$.html"
+      }
+    },
+    {
+      "type": "Assignment",
+      "left": {
+        "type": "Var",
+        "name": "$--out content--$"
+      },
+      "right": {
+        "type": "FnCall",
+        "name": "file",
+        "args": [
+          [
+            "template.html"
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Assignment",
+      "left": {
+        "type": "Var",
+        "name": "$-article title-$"
+      },
+      "right": {
+        "type": "String",
+        "value": "Ray Tracing"
+      }
+    },
+    {
+      "type": "Assignment",
+      "left": {
+        "type": "Var",
+        "name": "$-article contents-$"
+      },
+      "right": {
+        "type": "String",
+        "value": "<p>\n  blah blah blah \"double quotes\"\n  bling blung\n</p>\n\n<h2>Ray-Sphere Intersection</h2>\n<p>\n  blah blah blah\n  bling blung\n</p>"
+      }
+    }
+  ]
+}
