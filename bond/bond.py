@@ -1,19 +1,40 @@
-import os
+import lexing
+import parsing
+import log
+import utils
 
-import tokens
-import syntax
+script_dir = str(utils.resolve_path(__file__).parent)
 
 
 def process(path: str):
-    with open(path, mode='r', encoding="utf8") as f:
-        tokenization_result = tokens.tokenize(f)
-        print(tokenization_result)
+    fpath = utils.resolve_path(path)
+    path = str(fpath)
+    parent_path = str(fpath.parent)
+    filename = fpath.name
+    filename_stem = fpath.stem
 
-        syntax_tree = syntax.build(tokenization_result)
-        print(syntax_tree)
+    with open(path, mode='r', encoding='utf8') as f:
+        lexer = lexing.Lexer(f)
+        utils.write_to_file(
+            str(lexer),
+            f'{parent_path}/.bond/{filename}.lexer.json'
+        )
+
+        if not lexer.ok:
+            return False
+
+        parser = parsing.Parser(lexer)
+        utils.write_to_file(
+            str(parser),
+            f'{parent_path}/.bond/{filename}.parser.json'
+        )
+
+        if not parser.ok:
+            return False
 
         # TODO Compile
 
+        return True
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-process(f'{script_dir}/../src/articles/ray-tracing.ssc')
+
+process(f'{script_dir}/../src/test.ssc')
