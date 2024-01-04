@@ -71,7 +71,7 @@ class Parser:
         if not self.ok:
             return
 
-        self._info('starting to parse')
+        self._info('parsing')
 
         while self.head < len(self.tokens) - 1:
             self.nodes.append(self._statement())
