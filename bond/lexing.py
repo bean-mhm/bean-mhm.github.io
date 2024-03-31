@@ -299,7 +299,7 @@ class Lexer:
 
 
 # returns (pos, eof, buf)
-def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
+def read_char(f, pos: TokenPos) -> tuple[TokenPos, bool, str]:
     buf = f.read(1)
     if not buf:
         return (pos, True, '')
@@ -316,6 +316,6 @@ def read_char(f, pos: TokenPos) -> (TokenPos, bool, str):
 
 
 # returns (pos, eof, buf)
-def append_char(f, pos: TokenPos, buf: str) -> (TokenPos, bool, str):
+def append_char(f, pos: TokenPos, buf: str) -> tuple[TokenPos, bool, str]:
     pos, eof, new_buf = read_char(f, pos)
     return (pos, eof, buf + new_buf)
