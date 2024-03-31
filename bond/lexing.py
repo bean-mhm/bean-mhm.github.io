@@ -71,7 +71,7 @@ class Lexer:
                 continue
 
             # comment
-            if buf == '#':
+            elif buf == '#':
                 eof = False
                 while True:
                     pos, eof, buf = read_char(self.f, pos)
@@ -86,31 +86,9 @@ class Lexer:
                 else:
                     continue
 
-            # variable
-            elif buf == '$':
-                start_pos = copy.deepcopy(pos)
-
-                pos, eof, buf = append_char(self.f, pos, buf)
-                if eof:
-                    self._log_unexpected_eof([pos])
-                    return
-                elif not buf.startswith('$-'):
-                    self._error('expected \'-\' after \'$\'', [pos])
-                    return
-
-                while True:
-                    pos, eof, buf = append_char(self.f, pos, buf)
-                    if eof:
-                        self._log_unexpected_eof([pos])
-                        return
-                    elif buf.endswith('-$'):
-                        break
-
-                if not utils.check_var_token(buf):
-                    self._log_invalid_var_token([start_pos])
-                    return
-
-                self.tokens.append(Token(pos=start_pos, type='Var', data=buf))
+            # EOL (semicolon)
+            elif buf == ';':
+                self.tokens.append(Token(pos=copy.deepcopy(pos), type='EOL', data=buf))
                 continue
 
             # equal sign
@@ -168,6 +146,33 @@ class Lexer:
                 self.tokens.append(Token(pos=copy.deepcopy(pos), type='Bang', data=buf))
                 continue
 
+            # variable
+            elif buf == '$':
+                start_pos = copy.deepcopy(pos)
+
+                pos, eof, buf = append_char(self.f, pos, buf)
+                if eof:
+                    self._log_unexpected_eof([pos])
+                    return
+                elif not buf.startswith('$-'):
+                    self._error('expected \'-\' after \'$\'', [pos])
+                    return
+
+                while True:
+                    pos, eof, buf = append_char(self.f, pos, buf)
+                    if eof:
+                        self._log_unexpected_eof([pos])
+                        return
+                    elif buf.endswith('-$'):
+                        break
+
+                if not utils.check_var_token(buf):
+                    self._log_invalid_var_token([start_pos])
+                    return
+
+                self.tokens.append(Token(pos=start_pos, type='Var', data=buf))
+                continue
+
             # string literal
             elif buf == '"':
                 start_pos = copy.deepcopy(pos)
@@ -181,6 +186,8 @@ class Lexer:
                         if eof:
                             self._log_unexpected_eof([pos])
                             return
+                        elif buf[-1] == '0':
+                            buf = buf[:-2] + '\0'
                         elif buf[-1] == 'a':
                             buf = buf[:-2] + '\a'
                         elif buf[-1] == 'b':
