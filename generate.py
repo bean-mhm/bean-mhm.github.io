@@ -140,17 +140,17 @@ class Article:
         _cfg_resolve_vars(data_copy, data_copy['vars'], True)
         _cfg_resolve_vars(data_copy, glob.vars, True)
 
-        self.id = str(data_copy['id']).strip().lower()
-        self.title = str(data_copy['title']).strip()
-        self.contents = str(data_copy['contents'])
+        self.id = str(data_copy['article_id']).strip().lower()
+        self.title = str(data_copy['article_title']).strip()
+        self.contents = str(data_copy['article_contents'])
         self.vars = data_copy['vars']
 
         _cfg_resolve_vars(
             self.vars,
             {
-                'id': self.id,
-                'title': self.title,
-                'contents': self.contents
+                'article_id': self.id,
+                'article_title': self.title,
+                'article_contents': self.contents
             },
             False
         )
@@ -163,9 +163,9 @@ class Article:
 
     def __str__(self) -> str:
         return pytomlpp.dumps({
-            'id': self.id,
-            'title': self.title,
-            'contents': self.contents,
+            'article_id': self.id,
+            'article_title': self.title,
+            'article_contents': self.contents,
             'vars': self.vars
         })
 
@@ -176,9 +176,9 @@ class ArticleCategory:
     desc: str
 
     def __init__(self, data: dict):
-        self.id = str(data['id']).strip().lower()
-        self.name = str(data['name']).strip()
-        self.desc = str(data['desc']).strip()
+        self.id = str(data['category_id']).strip().lower()
+        self.name = str(data['category_name']).strip()
+        self.desc = str(data['category_desc']).strip()
 
     def from_str(s):
         return ArticleCategory(load_toml_str(s))
@@ -188,9 +188,9 @@ class ArticleCategory:
 
     def __str__(self) -> str:
         return pytomlpp.dumps({
-            'id': self.id,
-            'name': self.name,
-            'desc': self.desc
+            'category_id': self.id,
+            'category_name': self.name,
+            'category_desc': self.desc
         })
 
 
@@ -297,9 +297,9 @@ for p in articles_path.iterdir():
                 out_data, n_replaced = str_resolve_vars(
                     out_data,
                     {
-                        'id': article.id,
-                        'title': article.title,
-                        'contents': article.contents
+                        'article_id': article.id,
+                        'article_title': article.title,
+                        'article_contents': article.contents
                     },
                     False
                 )

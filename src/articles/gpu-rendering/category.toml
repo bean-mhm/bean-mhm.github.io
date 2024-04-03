@@ -1,3 +1,3 @@
-id = "gpu-rendering"
-name = "Rendering on the GPU"
-desc = ""
+category_id = "gpu-rendering"
+category_name = "Rendering on the GPU"
+category_desc = ""
