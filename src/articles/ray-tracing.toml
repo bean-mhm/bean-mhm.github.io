@@ -1,0 +1,17 @@
+out_filename = "$--root_path--$/articles/$--filename_stem--$.html"
+source = "template.html"
+
+[vars]
+article_title = "Ray Tracing"
+article_contents = """
+<p>
+  blah blah blah \"double quotes\"
+  bling blung
+</p>
+
+<h2>Ray-Sphere Intersection</h2>
+<p>
+  blah blah blah
+  bling blung
+</p>
+"""

@@ -1,8 +1,0 @@
-# site root directory
-$-root dir-$ = path("../docs")
-
-$-blog name-$ = "bean's website"
-$-blog desc-$ = "personal blog about stuff"
-
-$-blog icon url-$ = "$-root dir-$/icon.png"
-$-blog icon alt-$ = "blog icon"
