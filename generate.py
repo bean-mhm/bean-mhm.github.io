@@ -5,7 +5,47 @@ import shutil
 import errno
 
 
-def copy_any(src, dst):
+class Config:
+    data: dict
+
+    def __init__(self, data: dict):
+        self.data = data
+
+        # verify variable names
+        for key in self.data['vars'].keys():
+            if key.startswith('-'):
+                raise Exception(
+                    'variable name can\'t start with "-"'
+                )
+
+        # resolve variables internally
+        for key, val in self.data['vars'].items():
+            for key2 in self.data['vars'].keys():
+                self.data['vars'][key2] = self.data['vars'][key2].replace(
+                    f'$-{key}-$',
+                    val
+                )
+
+    def from_str(s):
+        return Config(pytomlpp.loads(s))
+
+    def from_path(p):
+        return Config(pytomlpp.loads(open(p, encoding='utf8').read()))
+
+    def __str__(self) -> str:
+        return pytomlpp.dumps(self.data)
+
+
+def path_remove(p: Path):
+    if not p.exists():
+        return
+    if (p.is_dir()):
+        shutil.rmtree(p)
+    else:
+        p.unlink()
+
+
+def path_copy(src, dst):
     try:
         shutil.copytree(src, dst)
     except OSError as exc:
@@ -15,40 +55,20 @@ def copy_any(src, dst):
             raise
 
 
-def load_cfg(path) -> dict:
-    return pytomlpp.loads(open(path, encoding='utf8').read())
-
-
-def check_var_names(cfg: dict):
-    for key in cfg['vars'].keys():
-        if key.startswith('_') or key.startswith('-'):
-            raise Exception(
-                'user-defined variable name can\'t start with _ or -'
-            )
-
-
-def resolve_internal(cfg: dict) -> dict:
-    for key, val in cfg['vars'].items():
-        for key2 in cfg['vars'].keys():
-            cfg['vars'][key2] = cfg['vars'][key2].replace(
-                f'$-{key}-$',
-                val
-            )
-
-
+# work in the source directory
 src_path = Path('./src').resolve()
 os.chdir(src_path)
 
-global_cfg = load_cfg('global.toml')
-root_path = Path(global_cfg['root_path']).resolve()
+# load the global config
+glob = Config.from_path('global.toml')
+root_path = Path(glob.data['root_path']).resolve()
+glob.data['root_path'] = str(root_path)
 
-shutil.rmtree(root_path / 'assets')
-copy_any(
+# copy assets
+path_remove(root_path / 'assets')
+path_copy(
     src_path / 'assets',
     root_path / 'assets'
 )
 
-check_var_names(global_cfg)
-resolve_internal(global_cfg)
-
-print(global_cfg)
+print(glob)
