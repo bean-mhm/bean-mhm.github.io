@@ -1,5 +1,5 @@
-out_filename = "$--root_path--$/articles/$--filename_stem--$.html"
-source = "template.html"
+src_path = "./template.html"
+out_path = "$--root_path--$/articles/$--filename_stem--$.html"
 
 [vars]
 article_title = "Ray Tracing"
