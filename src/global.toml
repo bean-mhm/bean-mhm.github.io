@@ -1,7 +1,7 @@
 root_path = "../docs"
 
 [vars]
-blog_name = "bean's website"
-blog_desc = "personal blog about stuff"
-blog_icon_url = "$--root_path--$/icon.png"
-blog_icon_alt = "$-blog_desc-$ 🐔"
+blog_name = "normalizd coding"
+blog_desc = "shaders • physics • computers • math "
+blog_icon_url = "$--root_path--$/assets/images/logo.png"
+blog_icon_alt = "blog icon"

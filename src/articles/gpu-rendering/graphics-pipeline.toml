@@ -1,0 +1,16 @@
+id = "graphics-pipeline"
+title = "Graphics Pipeline"
+contents = """
+<p>
+  blah blah blah "double quotes"
+  bling blung
+</p>
+
+<h2>Input Assembly</h2>
+<p>
+  blah blah blah
+  bling blung
+</p>
+"""
+
+[vars]
