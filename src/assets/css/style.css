@@ -54,3 +54,18 @@
 * {
   --typography-spacing-vertical: 1.3rem !important;
 }
+
+.social-link {
+  display: inline-block;
+  margin-left: 0.7rem;
+}
+
+.social-icon {
+  height: 1.7rem;
+  aspect-ratio: 1/1;
+}
+
+.social-icon-long {
+  height: 1.7rem;
+  width: auto;
+}
