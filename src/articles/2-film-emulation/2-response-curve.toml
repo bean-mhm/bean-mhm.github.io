@@ -1,5 +1,5 @@
-article_id = "test-article2"
-article_title = "Another Article"
+article_id = "response-curve"
+article_title = "Response Curve"
 article_contents = """
 <p>
   The static site generator script is still under work so this is placeholder text I hope you're having a nice day.

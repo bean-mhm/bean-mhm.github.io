@@ -1,5 +1,5 @@
-article_id = "test-article"
-article_title = "Placeholder Article"
+article_id = "logic-gates"
+article_title = "Logic Gates: The Building Blocks"
 article_contents = """
 <p>
   The static site generator script is still under work so this is placeholder text I hope you're having a nice day.
