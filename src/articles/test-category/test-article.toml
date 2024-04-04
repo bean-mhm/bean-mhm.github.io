@@ -1,0 +1,14 @@
+article_id = "test-article"
+article_title = "Placeholder Article"
+article_contents = """
+<p>
+  The static site generator script is still under work so this is placeholder text I hope you're having a nice day.
+</p>
+
+<h2>Some Topic</h2>
+<p>
+  This topic is really cool I want to talk about it all the time.
+</p>
+"""
+
+[vars]
