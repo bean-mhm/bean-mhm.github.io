@@ -81,6 +81,15 @@ p {
   height: fit-content;
   margin-top: 1.1rem;
   margin-bottom: 3rem;
+
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.blog-info-container:hover {
+  color: inherit;
+  text-decoration: none !important;
+  cursor: pointer;
 }
 
 .blog-icon {
