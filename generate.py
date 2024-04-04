@@ -11,9 +11,37 @@ import shutil
 import errno
 
 
+err_max_var_res = \
+    'too many continuous variable resolutions, maybe a circular reference or ' \
+    'repeated variable names in different configs?'
+
+
 def elapsed_since(t_start):
     elapsed = time.time() - t_start
     return f'{elapsed:.3f} s'
+
+
+def path_remove(p: Path):
+    if not p.exists():
+        return
+    if (p.is_dir()):
+        shutil.rmtree(p)
+    else:
+        p.unlink()
+
+
+def path_copy(src, dst):
+    try:
+        shutil.copytree(src, dst)
+    except OSError as exc:
+        if exc.errno in (errno.ENOTDIR, errno.EINVAL):
+            shutil.copy(src, dst)
+        else:
+            raise
+
+
+def read_file(p) -> str:
+    return open(p, encoding='utf8').read()
 
 
 def load_toml_str(s) -> dict:
@@ -21,7 +49,7 @@ def load_toml_str(s) -> dict:
 
 
 def load_toml_file(p) -> dict:
-    return pytomlpp.loads(open(p, encoding='utf8').read())
+    return pytomlpp.loads(read_file(p))
 
 
 def _cfg_verify_vars(data: dict):
@@ -69,10 +97,7 @@ def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
     n_resolved = 0
     while (True):
         if n_resolved > 10:
-            raise Exception(
-                'too many continuous variable resolutions, maybe a circular '
-                'reference?'
-            )
+            raise Exception(err_max_var_res)
         n_replaced = 0
         for vname, vval in vars.items():
             n_replaced += replace_recursive(data, var_fmt.format(vname), vval)
@@ -130,6 +155,7 @@ class Article:
     title: str
     contents: str
     vars: dict
+    out_path: Path
 
     def __init__(self, data: dict, glob: GlobalConfig):
         self.glob = glob
@@ -144,6 +170,7 @@ class Article:
         self.title = str(data_copy['article_title']).strip()
         self.contents = str(data_copy['article_contents'])
         self.vars = data_copy['vars']
+        self.out_path = Path()
 
         _cfg_resolve_vars(
             self.vars,
@@ -174,11 +201,13 @@ class ArticleCategory:
     id: str
     name: str
     desc: str
+    articles: list[Article]
 
     def __init__(self, data: dict):
         self.id = str(data['category_id']).strip().lower()
         self.name = str(data['category_name']).strip()
         self.desc = str(data['category_desc']).strip()
+        self.articles = []
 
     def from_str(s):
         return ArticleCategory(load_toml_str(s))
@@ -192,25 +221,6 @@ class ArticleCategory:
             'category_name': self.name,
             'category_desc': self.desc
         })
-
-
-def path_remove(p: Path):
-    if not p.exists():
-        return
-    if (p.is_dir()):
-        shutil.rmtree(p)
-    else:
-        p.unlink()
-
-
-def path_copy(src, dst):
-    try:
-        shutil.copytree(src, dst)
-    except OSError as exc:
-        if exc.errno in (errno.ENOTDIR, errno.EINVAL):
-            shutil.copy(src, dst)
-        else:
-            raise
 
 
 # increase max stack size and recursion depth
@@ -233,18 +243,26 @@ path_copy(
     glob.root_path / 'assets'
 )
 
-# articles directory
+# remove the articles output directory before rewriting it
+path_remove(glob.root_path / 'articles')
+
+# HTML template files
+index_template = read_file(src_path / 'templates' / 'index.html')
+footer_template = read_file(src_path / 'templates' / 'footer.html')
+article_template = read_file(src_path / 'templates' / 'article.html')
+
+# keep track of the article categories
+categories = []
+
+# keep track of all the article category IDs
+category_ids = set()
+
+# articles source directory
 articles_path = src_path / 'articles'
 if not articles_path.is_dir():
     raise Exception('articles directory "{articles_path}" doesn\'t exist')
 
-# article template
-article_template = open(
-    articles_path / 'template.html',
-    encoding='utf8'
-).read()
-
-# iterate through the articles directory
+# iterate through the articles source directory
 for p in articles_path.iterdir():
     # find a category
     if not p.is_dir():
@@ -255,8 +273,13 @@ for p in articles_path.iterdir():
     category = ArticleCategory.from_path(category_path)
     print(f'> {category.name} ({category.id})')
 
+    # category ID must be unique
+    if category.id in category_ids:
+        raise Exception(f'category ID "{category.id}" is already seen')
+
     # iterate through the articles in the category
     for p2 in p.iterdir():
+        # find an article
         if p2.is_dir():
             continue
         if p2.suffix != '.toml':
@@ -264,42 +287,40 @@ for p in articles_path.iterdir():
         if p2.stem.lower() == 'category':
             continue
         article = Article.from_path(p2, glob)
+        print(f'  - {article.title}', end='', flush=True)
         t_start_article = time.time()
 
-        out_path = \
+        # output path
+        article.out_path = \
             glob.root_path / 'articles' / category.id / (article.id + '.html')
-        out_path.parent.mkdir(parents=True, exist_ok=True)
+        article.out_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(out_path, mode='w', encoding='utf8') as out_file:
+        # add the article to the category
+        category.articles.append(article)
+
+        # open the output file
+        with open(article.out_path, mode='w', encoding='utf8') as out_file:
+            # start with the template
             out_data = article_template
 
+            # resolve the variables
             n_resolved = 0
             while (True):
                 if n_resolved > 10:
-                    raise Exception(
-                        'too many continuous variable resolutions, maybe a '
-                        'circular reference?'
-                    )
+                    raise Exception(err_max_var_res)
                 n_total_replaced = 0
 
                 root_path_rel = Path(
-                    os.path.relpath(glob.root_path, out_path.parent)
+                    os.path.relpath(glob.root_path, article.out_path.parent)
                 ).as_posix()
                 out_data, n_replaced = str_resolve_vars(
                     out_data,
                     {
-                        'root_path': root_path_rel
-                    },
-                    False
-                )
-                n_total_replaced += n_replaced
-
-                out_data, n_replaced = str_resolve_vars(
-                    out_data,
-                    {
+                        'root_path': root_path_rel,
                         'article_id': article.id,
                         'article_title': article.title,
-                        'article_contents': article.contents
+                        'article_contents': article.contents,
+                        'footer': footer_template
                     },
                     False
                 )
@@ -323,9 +344,14 @@ for p in articles_path.iterdir():
                     break
                 n_resolved += 1
 
+            # write
             out_file.write(out_data)
 
-        print(f'  - {article.title} ({elapsed_since(t_start_article)})')
+        print(f' ({elapsed_since(t_start_article)})')
     print('')
+
+    # add the category to the list
+    categories.append(category)
+    category_ids.add(category.id)
 
 print(f'finished in {elapsed_since(t_start)}')
