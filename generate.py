@@ -11,7 +11,6 @@ from utils import *
 def compile_articles(
     src_path: Path,
     glob: GlobalConfig,
-    footer_template: str,
     article_template: str
 ) -> list[ArticleCategory]:
     print_div()
@@ -105,8 +104,7 @@ def compile_articles(
                             'root_path': root_path_rel,
                             'article_id': article.id,
                             'article_title': article.title,
-                            'article_contents': article.contents,
-                            'footer': footer_template
+                            'article_contents': article.contents
                         },
                         False
                     )
@@ -154,7 +152,6 @@ def compile_index(
     src_path: Path,
     glob: GlobalConfig,
     index_template: str,
-    footer_template: str,
     categories: list[ArticleCategory]
 ):
     print(f'> index (...)', end='', flush=True)
@@ -220,8 +217,7 @@ def compile_index(
                 out_data,
                 {
                     'root_path': root_path_rel,
-                    'article_list': article_list,
-                    'footer': footer_template
+                    'article_list': article_list
                 },
                 False
             )
@@ -255,7 +251,6 @@ def compile_pages(
     src_path: Path,
     glob: GlobalConfig,
     index_template: str,
-    footer_template: str,
     categories: list[ArticleCategory]
 ):
     print_div()
@@ -266,7 +261,6 @@ def compile_pages(
         src_path,
         glob,
         index_template,
-        footer_template,
         categories
     )
 
@@ -296,20 +290,17 @@ def generate_site():
     )
 
     index_template = read_file(src_path / 'templates' / 'index.html')
-    footer_template = read_file(src_path / 'templates' / 'footer.html')
     article_template = read_file(src_path / 'templates' / 'article.html')
 
     categories = compile_articles(
         src_path,
         glob,
-        footer_template,
         article_template
     )
     compile_pages(
         src_path,
         glob,
         index_template,
-        footer_template,
         categories
     )
 

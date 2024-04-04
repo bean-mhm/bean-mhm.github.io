@@ -5,3 +5,22 @@ blog_name = "bit bending with bean"
 blog_desc = "shaders • physics • computers • math "
 blog_icon_url = "$--root_path--$/assets/images/icon.png"
 blog_icon_alt = "blog icon"
+head_common = """
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="$--root_path--$/assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="$--root_path--$/assets/css/style.css" />
+"""
+footer = """
+<footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="$--root_path--$/assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="$--root_path--$/assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="$--root_path--$/assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+"""
