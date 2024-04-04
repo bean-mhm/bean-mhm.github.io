@@ -1,0 +1,10 @@
+category_start = """
+<h1>$--category_name--$</h1>
+<h3>$--category_desc--$</h3>
+"""
+
+article_link = """
+<a href="$--article_path--$">$--article_title--$</a>
+"""
+
+category_end = ""
