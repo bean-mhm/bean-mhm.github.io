@@ -3,5 +3,5 @@ root_path = "../docs"
 [vars]
 blog_name = "bit bending with bean"
 blog_desc = "shaders • physics • computers • math "
-blog_icon_url = "$--root_path--$/assets/images/logo.png"
+blog_icon_url = "$--root_path--$/assets/images/icon.png"
 blog_icon_alt = "blog icon"
