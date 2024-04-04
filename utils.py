@@ -8,7 +8,8 @@ import errno
 import pytomlpp
 
 
-err_max_var_res = \
+MAX_VAR_RES = 10
+ERR_MAX_VAR_RES = \
     'too many continuous variable resolutions, maybe a circular reference or ' \
     'repeated variable names in different configs?'
 
@@ -227,7 +228,7 @@ def get_var_format(user_defined: bool) -> str:
 
 
 def _cfg_verify_vars(data: dict):
-    if not data['vars']:
+    if 'vars' not in data:
         data['vars'] = {}
 
     if not isinstance(data['vars'], dict):
@@ -245,8 +246,8 @@ def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
     var_fmt = get_var_format(user_defined)
     n_resolved = 0
     while (True):
-        if n_resolved > 10:
-            raise Exception(err_max_var_res)
+        if n_resolved > MAX_VAR_RES:
+            raise Exception(ERR_MAX_VAR_RES)
         n_replaced = 0
         for vname, vval in vars.items():
             n_replaced += replace_recursive(data, var_fmt.format(vname), vval)
