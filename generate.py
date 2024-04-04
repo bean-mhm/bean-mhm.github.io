@@ -275,7 +275,12 @@ for p in articles_path.iterdir():
 
     # category ID must be unique
     if category.id in category_ids:
-        raise Exception(f'category ID "{category.id}" is already seen')
+        raise Exception(f'category ID "{category.id}" is not unique')
+    else:
+        category_ids.add(category.id)
+
+    # keep track of all the article IDs in the current category
+    article_ids = set()
 
     # iterate through the articles in the category
     for p2 in p.iterdir():
@@ -287,8 +292,14 @@ for p in articles_path.iterdir():
         if p2.stem.lower() == 'category':
             continue
         article = Article.from_path(p2, glob)
-        print(f'  - {article.title}', end='', flush=True)
+        print(f'  - {article.title} ({article.id}) (...)', end='', flush=True)
         t_start_article = time.time()
+
+        # article ID must be unique
+        if article.id in article_ids:
+            raise Exception(f'article ID "{article.id}" is not unique')
+        else:
+            article_ids.add(article.id)
 
         # output path
         article.out_path = \
@@ -347,11 +358,13 @@ for p in articles_path.iterdir():
             # write
             out_file.write(out_data)
 
-        print(f' ({elapsed_since(t_start_article)})')
+        print(
+            f'\r  - {article.title} ({article.id}) '
+            f'({elapsed_since(t_start_article)})'
+        )
     print('')
 
     # add the category to the list
     categories.append(category)
-    category_ids.add(category.id)
 
 print(f'finished in {elapsed_since(t_start)}')
