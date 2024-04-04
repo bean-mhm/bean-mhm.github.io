@@ -1,10 +1,12 @@
-category_start = """
+category_content_start = """
 <h1>$--category_name--$</h1>
 <h3>$--category_desc--$</h3>
 """
 
-article_link = """
+article_link_content = """
 <a href="$--article_path--$">$--article_title--$</a>
 """
 
-category_end = ""
+category_content_end = ""
+
+[vars]
