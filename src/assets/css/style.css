@@ -8,8 +8,8 @@
 }
 
 @font-face {
-  font-family: Signika;
-  src: url(../fonts/Signika/Signika-VariableFont_GRAD\,wght.ttf);
+  font-family: Rubik;
+  src: url(../fonts/Rubik/Rubik-VariableFont_wght.ttf);
 }
 
 @font-face {
@@ -23,7 +23,7 @@
 }
 
 :root {
-  --font-family: Signika, system-ui, sans-serif;
+  --font-family: Rubik, system-ui, sans-serif;
 }
 
 .blog-info-container {
