@@ -168,6 +168,9 @@ t_start_pages = time.time()
 
 # index
 
+# remove the previous output file
+path_remove(glob.root_path / 'index.html')
+
 print(f'> index (...)', end='', flush=True)
 t_start_index = time.time()
 index = IndexPage.from_path(src_path / 'index.toml', glob)
