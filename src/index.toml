@@ -1,6 +1,6 @@
 category_content_start = """
 <h1>$--category_name--$</h1>
-<h4>$--category_desc--$</h4>
+<h5>$--category_desc--$</h5>
 """
 
 article_link_content = """
@@ -8,6 +8,6 @@ article_link_content = """
 <br />
 """
 
-category_content_end = "<br />"
+category_content_end = "<br /><br />"
 
 [vars]
