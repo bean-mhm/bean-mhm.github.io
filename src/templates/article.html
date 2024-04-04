@@ -2,20 +2,20 @@
 <html lang="en" data-theme="dark">
 
 <head>
-  $-head_common-$
+  $--load_src--$("templates/custom/head-common.html")
   <title>$--article_title--$</title>
 </head>
 
 <body>
   <main class="container">
-    $-blog_info-$
+    $--load_src--$("templates/custom/blog-info.html")
 
-    <article id="article">
+    <article>
       <h1>$--article_title--$</h1>
       $--article_contents--$
     </article>
 
-    $-footer-$
+    $--load_src--$("templates/custom/footer.html")
   </main>
 </body>
 

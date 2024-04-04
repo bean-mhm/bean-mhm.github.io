@@ -2,15 +2,15 @@
 <html lang="en" data-theme="dark">
 
 <head>
-  $-head_common-$
+  $--load_src--$("templates/custom/head-common.html")
   <title>$-blog_name-$</title>
 </head>
 
 <body>
   <main class="container">
-    $-blog_info-$
+    $--load_src--$("templates/custom/blog-info.html")
 
-    <article id="article">
+    <article>
       <h1>Introduction</h1>
       <p>
         I'm a guy who is fascinated by computers and graphics. I love how you
@@ -32,11 +32,11 @@
       <button>Run Demo</button>
     </article>
 
-    <article id="article">
+    <article>
       $--article_list--$
     </article>
 
-    $-footer-$
+    $--load_src--$("templates/custom/footer.html")
   </main>
 </body>
 
