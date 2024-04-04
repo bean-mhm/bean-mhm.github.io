@@ -166,10 +166,18 @@ print_div()
 print('compiling pages...\n')
 t_start_pages = time.time()
 
-# TODO: index
+# index
+
+print(f'> index (...)', end='', flush=True)
+t_start_index = time.time()
+index = IndexPage.from_path(src_path / 'index.toml', glob)
+
+# TODO compile index
+
+print(f'\r> index ({elapsed_since(t_start_article)})')
 
 # done compiling pages
-print(f'all pages compiled in {elapsed_since(t_start_pages)}\n')
+print(f'\nall pages compiled in {elapsed_since(t_start_pages)}\n')
 
 # all done
 print_div()
