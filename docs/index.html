@@ -1,51 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="dark">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WIP</title>
-    <style>
-        html {
-            width: 100%;
-            height: 100%;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-
-            background-color: #1A1D23;
-            color: #EFEFEF;
-            font-family: "Trebuchet MS", Helvetica, sans-serif;
-            font-size: 1.5rem;
-        }
-
-        .container {
-            display: flex;
-            justify-content: center;
-            align-content: center;
-            flex-flow: column wrap;
-            width: 100%;
-            height: 100%;
-        }
-
-        p {
-            margin-top: 0;
-            margin-bottom: 1.1rem;
-            margin-left: 1.5rem;
-            margin-right: 1.5rem;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>bit bending with bean</title>
+  <link rel="stylesheet" href="./assets/pico-1.5.10/css/pico.min.css" />
+  <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 
 <body>
-    <div class="container">
-        <p>Hello, random stranger on the internet.</p>
-        <p>This website is still under construction, come back later!</p>
+  <main class="container">
+    <div class="blog-info-container">
+      <img class="blog-icon" src="./assets/images/icon.png" alt="blog icon" />
+      <div>
+        <h2 class="blog-name">bit bending with bean</h2>
+        <h4 class="blog-desc">shaders • physics • computers • math </h4>
+      </div>
     </div>
+
+    <article id="article">
+      <h1>Introduction</h1>
+      <p>
+        I'm a guy who is fascinated by computers and graphics. I love how you
+        can use shaders and a bit of math knowledge to produce great looking
+        images that might look like real photos. I find it amazing how you can
+        combine logic gates to build a device capable of executing any given
+        series of instructions. I like how we can simulate interesting physical
+        phenomena with a bit of coding.
+      </p>
+      <p>
+        I made this blog to share the tiny amount of knowledge I've learned, and
+        different projects that I work on. I might post about various other
+        topics at times.
+      </p>
+      <p>
+        Below is a list of all the articles I've written so far. Hope you learn
+        something new here!
+      </p>
+    </article>
+
+    <article id="article">
+      <h1>How Computers Work</h1>
+<h4>Exploring how one could make a very basic computer from scratch using nothing but logic gates.</h4>
+<a href="articles/how-computers-work/adding-numbers.html">Adding Numbers in Binary</a>
+<br />
+<a href="articles/how-computers-work/binary.html">Getting Familiar with Binary</a>
+<br />
+<a href="articles/how-computers-work/logic-gates.html">Logic Gates: The Building Blocks</a>
+<br />
+<br /><h1>Film Emulation</h1>
+<h4>Learning how a piece of film responds to light and how we can exploit that to capture the light.</h4>
+<a href="articles/film-emulation/what-is-film.html">What is Film?</a>
+<br />
+<a href="articles/film-emulation/response-curve.html">Response Curve</a>
+<br />
+<br />
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="./assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="./assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="./assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
 </body>
 
 </html>
