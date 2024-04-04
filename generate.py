@@ -91,8 +91,6 @@ def compile_articles(
                 # resolve variables
                 n_resolved = 0
                 while (True):
-                    if n_resolved > MAX_VAR_RES:
-                        raise Exception(ERR_MAX_VAR_RES)
                     n_total_replaced = 0
 
                     root_path_rel = Path(
@@ -124,9 +122,17 @@ def compile_articles(
                     )
                     n_total_replaced += n_replaced
 
+                    out_data, n_replaced = str_resolve_load_src(
+                        out_data,
+                        src_path
+                    )
+                    n_total_replaced += n_replaced
+
                     if (n_total_replaced < 1):
                         break
                     n_resolved += 1
+                    if n_resolved > MAX_VAR_RES:
+                        raise Exception(ERR_MAX_VAR_RES)
 
                 # write
                 out_file.write(out_data)
@@ -208,8 +214,6 @@ def compile_index(
         # resolve variables
         n_resolved = 0
         while (True):
-            if n_resolved > MAX_VAR_RES:
-                raise Exception(ERR_MAX_VAR_RES)
             n_total_replaced = 0
 
             root_path_rel = '.'
@@ -237,9 +241,14 @@ def compile_index(
             )
             n_total_replaced += n_replaced
 
+            out_data, n_replaced = str_resolve_load_src(out_data, src_path)
+            n_total_replaced += n_replaced
+
             if (n_total_replaced < 1):
                 break
             n_resolved += 1
+            if n_resolved > MAX_VAR_RES:
+                raise Exception(ERR_MAX_VAR_RES)
 
         # write
         out_file.write(out_data)

@@ -202,7 +202,7 @@ def load_toml_file(p) -> dict:
     return pytomlpp.loads(read_file(p))
 
 
-# returns the number of replacements
+# * returns the number of replacements
 def replace_recursive(data: dict, replace_what: str, replace_with: str) -> int:
     n_replaced = 0
     for k, v in data.items():
@@ -257,7 +257,7 @@ def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
 
 
 # use key-value pairs from vars to modify values in s
-# returns tuple with the result and the number of replacements
+# * returns tuple with the result and the number of replacements
 def str_resolve_vars(
     s: str,
     vars: dict,
@@ -270,4 +270,40 @@ def str_resolve_vars(
         if replace_what in s:
             s = s.replace(replace_what, vval)
             n_replaced += 1
+    return s, n_replaced
+
+
+# find places in s where we need to load text from a source file
+# * the paths referenced must be relative to the source directory and they
+#   shouldn't start with a slash
+# * example: $--load_src--$("templates/item.html")
+# * returns tuple with the result and the number of replacements
+def str_resolve_load_src(s: str, src_path: Path) -> tuple[str, int]:
+    start_trigger = get_var_format(False).format('load_src') + '("'
+    end_trigger = '")'
+    start_pos = 0
+    n_replaced = 0
+    while True:
+        trigger_pos = s.find(start_trigger, start_pos)
+        if trigger_pos == -1:
+            break
+
+        path_start_pos = trigger_pos + len(start_trigger)
+        path_end_pos = s.find(end_trigger, path_start_pos)
+        if path_end_pos == -1:
+            raise Exception('unclosed path')
+
+        path = src_path / Path(
+            s[path_start_pos:path_end_pos]
+        )
+        content = read_file(path)
+
+        s = \
+            s[:trigger_pos] \
+            + content \
+            + s[path_end_pos + len(end_trigger):]
+        n_replaced += 1
+
+        start_pos = path_end_pos + len(end_trigger)
+
     return s, n_replaced
