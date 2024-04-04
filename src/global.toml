@@ -5,12 +5,24 @@ blog_name = "bit bending with bean"
 blog_desc = "shaders • physics • computers • math "
 blog_icon_url = "$--root_path--$/assets/images/icon.png"
 blog_icon_alt = "blog icon"
+
 head_common = """
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="$--root_path--$/assets/pico-main/css/pico.violet.min.css" />
 <link rel="stylesheet" href="$--root_path--$/assets/css/style.css" />
 """
+
+blog_info = """
+<a class="blog-info-container" href="$--root_path--$/index.html" title="$-blog_name-$">
+  <img class="blog-icon" src="$-blog_icon_url-$" alt="$-blog_icon_alt-$" />
+  <div>
+    <h2 class="blog-name">$-blog_name-$</h2>
+    <h4 class="blog-desc">$-blog_desc-$</h4>
+  </div>
+</a>
+"""
+
 footer = """
 <footer>
   <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
