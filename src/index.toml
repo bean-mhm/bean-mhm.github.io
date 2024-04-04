@@ -4,7 +4,7 @@ category_content_start = """
 """
 
 article_link_content = """
-<a href="$--article_path--$">$--article_title--$</a>
+<a href="$--article_path--$" target="_blank">$--article_title--$</a>
 <br />
 """
 
