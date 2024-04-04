@@ -7,116 +7,10 @@ import errno
 
 import pytomlpp
 
+
 err_max_var_res = \
     'too many continuous variable resolutions, maybe a circular reference or ' \
     'repeated variable names in different configs?'
-
-
-def elapsed_since(t_start):
-    elapsed = time.time() - t_start
-    return f'{elapsed:.3f} s'
-
-
-def path_remove(p: Path):
-    if not p.exists():
-        return
-    if (p.is_dir()):
-        shutil.rmtree(p)
-    else:
-        p.unlink()
-
-
-def path_copy(src, dst):
-    try:
-        shutil.copytree(src, dst)
-    except OSError as exc:
-        if exc.errno in (errno.ENOTDIR, errno.EINVAL):
-            shutil.copy(src, dst)
-        else:
-            raise
-
-
-def read_file(p) -> str:
-    return open(p, encoding='utf8').read()
-
-
-def load_toml_str(s) -> dict:
-    return pytomlpp.loads(s)
-
-
-def load_toml_file(p) -> dict:
-    return pytomlpp.loads(read_file(p))
-
-
-def _cfg_verify_vars(data: dict):
-    if not data['vars']:
-        data['vars'] = {}
-
-    if not isinstance(data['vars'], dict):
-        raise Exception('vars must be a dict')
-
-    for key in data['vars'].keys():
-        if key.startswith('-'):
-            raise Exception(
-                'variable name can\'t start with "-"'
-            )
-
-
-# returns the number of replacements
-def replace_recursive(data: dict, replace_what: str, replace_with: str) -> int:
-    n_replaced = 0
-    for k, v in data.items():
-        if isinstance(v, dict):
-            replace_recursive(v, replace_what, replace_with)
-        elif type(v) is list:
-            replace_recursive(
-                {i: v for i, v in enumerate(v)},
-                replace_what,
-                replace_with
-            )
-        elif type(v) is str:
-            if replace_what in v:
-                data[k] = data[k].replace(replace_what, replace_with)
-                n_replaced += 1
-    return n_replaced
-
-
-def get_var_format(user_defined: bool) -> str:
-    if user_defined:
-        return '$-{}-$'
-    return '$--{}--$'
-
-
-# use key-value pairs from vars to modify values recursively in data
-def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
-    var_fmt = get_var_format(user_defined)
-    n_resolved = 0
-    while (True):
-        if n_resolved > 10:
-            raise Exception(err_max_var_res)
-        n_replaced = 0
-        for vname, vval in vars.items():
-            n_replaced += replace_recursive(data, var_fmt.format(vname), vval)
-        if (n_replaced < 1):
-            break
-        n_resolved += 1
-
-
-# use key-value pairs from vars to modify values in s
-# returns tuple with the result and the number of replacements
-def str_resolve_vars(
-    s: str,
-    vars: dict,
-    user_defined: bool
-) -> tuple[str, int]:
-    var_fmt = get_var_format(user_defined)
-    n_replaced = 0
-    for vname, vval in vars.items():
-        replace_what = var_fmt.format(vname)
-        if replace_what in s:
-            s = s.replace(replace_what, vval)
-            n_replaced += 1
-    return s, n_replaced
 
 
 class GlobalConfig:
@@ -219,3 +113,114 @@ class ArticleCategory:
             'category_desc': self.desc,
             'articles': [article.id for article in self.articles]
         })
+
+
+def print_div():
+    print('--------------------------------------------------\n')
+
+
+def elapsed_since(t_start):
+    elapsed = time.time() - t_start
+    return f'{elapsed:.3f} s'
+
+
+def path_remove(p: Path):
+    if not p.exists():
+        return
+    if (p.is_dir()):
+        shutil.rmtree(p)
+    else:
+        p.unlink()
+
+
+def path_copy(src, dst):
+    try:
+        shutil.copytree(src, dst)
+    except OSError as exc:
+        if exc.errno in (errno.ENOTDIR, errno.EINVAL):
+            shutil.copy(src, dst)
+        else:
+            raise
+
+
+def read_file(p) -> str:
+    return open(p, encoding='utf8').read()
+
+
+def load_toml_str(s) -> dict:
+    return pytomlpp.loads(s)
+
+
+def load_toml_file(p) -> dict:
+    return pytomlpp.loads(read_file(p))
+
+
+# returns the number of replacements
+def replace_recursive(data: dict, replace_what: str, replace_with: str) -> int:
+    n_replaced = 0
+    for k, v in data.items():
+        if isinstance(v, dict):
+            replace_recursive(v, replace_what, replace_with)
+        elif type(v) is list:
+            replace_recursive(
+                {i: v for i, v in enumerate(v)},
+                replace_what,
+                replace_with
+            )
+        elif type(v) is str:
+            if replace_what in v:
+                data[k] = data[k].replace(replace_what, replace_with)
+                n_replaced += 1
+    return n_replaced
+
+
+def get_var_format(user_defined: bool) -> str:
+    if user_defined:
+        return '$-{}-$'
+    return '$--{}--$'
+
+
+def _cfg_verify_vars(data: dict):
+    if not data['vars']:
+        data['vars'] = {}
+
+    if not isinstance(data['vars'], dict):
+        raise Exception('vars must be a dict')
+
+    for key in data['vars'].keys():
+        if key.startswith('-'):
+            raise Exception(
+                'variable name can\'t start with "-"'
+            )
+
+
+# use key-value pairs from vars to modify values recursively in data
+def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
+    var_fmt = get_var_format(user_defined)
+    n_resolved = 0
+    while (True):
+        if n_resolved > 10:
+            raise Exception(err_max_var_res)
+        n_replaced = 0
+        for vname, vval in vars.items():
+            n_replaced += replace_recursive(data, var_fmt.format(vname), vval)
+        if (n_replaced < 1):
+            break
+        n_resolved += 1
+
+
+# use key-value pairs from vars to modify values in s
+# returns tuple with the result and the number of replacements
+def str_resolve_vars(
+    s: str,
+    vars: dict,
+    user_defined: bool
+) -> tuple[str, int]:
+    var_fmt = get_var_format(user_defined)
+    n_replaced = 0
+    for vname, vval in vars.items():
+        replace_what = var_fmt.format(vname)
+        if replace_what in s:
+            s = s.replace(replace_what, vval)
+            n_replaced += 1
+    return s, n_replaced

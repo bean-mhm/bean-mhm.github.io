@@ -47,6 +47,11 @@ articles_path = src_path / 'articles'
 if not articles_path.is_dir():
     raise Exception('articles directory "{articles_path}" doesn\'t exist')
 
+# start compiling articles
+print_div()
+print('compiling articles...\n')
+t_start_articles = time.time()
+
 # iterate through the articles source directory
 for p in articles_path.iterdir():
     # find a category
@@ -152,4 +157,20 @@ for p in articles_path.iterdir():
     # add the category to the list
     categories.append(category)
 
+# done compiling articles
+n_articles = sum(len(category.articles) for category in categories)
+print(f'{n_articles} articles compiled in {elapsed_since(t_start_articles)}\n')
+
+# start compiling pages
+print_div()
+print('compiling pages...\n')
+t_start_pages = time.time()
+
+# TODO: index
+
+# done compiling pages
+print(f'all pages compiled in {elapsed_since(t_start_pages)}\n')
+
+# all done
+print_div()
 print(f'finished in {elapsed_since(t_start)}')
