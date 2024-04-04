@@ -17,12 +17,59 @@
   --pico-font-family: Rubik, system-ui, sans-serif;
   --pico-block-spacing-vertical: 3rem;
   --pico-block-spacing-horizontal: 2rem;
-  --pico-font-size: 122%;
   --pico-border-radius: 0.7rem;
 }
 
 * {
   --pico-typography-spacing-vertical: 1.4rem !important;
+}
+
+:root {
+  --pico-font-size: 122%;
+}
+
+@media only screen and (max-width: 1450px) {
+  :root {
+    --pico-font-size: 115%;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  :root {
+    --pico-font-size: 110%;
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  :root {
+    --pico-font-size: 100%;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  :root {
+    --pico-font-size: 95%;
+  }
+}
+
+.container {
+  max-width: 62%;
+}
+
+@media only screen and (max-width: 1450px) {
+  .container {
+    max-width: 80%;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .container {
+    max-width: 90%;
+  }
+}
+
+p {
+  font-size: 105%;
 }
 
 .blog-info-container {
@@ -42,9 +89,23 @@
   margin-right: 1rem;
 }
 
+@media only screen and (max-width: 520px) {
+  .blog-icon {
+    height: 2.9rem;
+    margin-right: 0.7rem;
+  }
+}
+
 .blog-name {
   --pico-font-family: ElMessiri-Bold, system-ui, sans-serif;
   margin-bottom: 0.3rem;
+}
+
+@media only screen and (max-width: 520px) {
+  .blog-name {
+    --pico-font-size: 1.5rem;
+    margin-bottom: 0.2rem;
+  }
 }
 
 .blog-desc {
@@ -52,12 +113,10 @@
   margin-bottom: 0.0rem;
 }
 
-.container {
-  max-width: 62%;
-}
-
-p {
-  font-size: 105%;
+@media only screen and (max-width: 520px) {
+  .blog-desc {
+    --pico-font-size: 1rem;
+  }
 }
 
 footer {
