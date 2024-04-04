@@ -115,6 +115,52 @@ class ArticleCategory:
         })
 
 
+class IndexPage:
+    glob: GlobalConfig
+    category_content_start: str
+    article_link_content: str
+    category_content_end: str
+    vars: dict
+
+    def __init__(self, data: dict, glob: GlobalConfig):
+        self.glob = glob
+
+        data_copy = copy.deepcopy(data)
+
+        _cfg_verify_vars(data_copy)
+        _cfg_resolve_vars(data_copy, data_copy['vars'], True)
+        _cfg_resolve_vars(data_copy, glob.vars, True)
+
+        self.category_content_start = str(data_copy['category_content_start'])
+        self.article_link_content = str(data_copy['article_link_content'])
+        self.category_content_end = str(data_copy['category_content_end'])
+        self.vars = data_copy['vars']
+
+        _cfg_resolve_vars(
+            self.vars,
+            {
+                'category_content_start': self.category_content_start,
+                'article_link_content': self.article_link_content,
+                'category_content_end': self.category_content_end
+            },
+            False
+        )
+
+    def from_str(s, glob: GlobalConfig):
+        return IndexPage(load_toml_str(s), glob)
+
+    def from_path(p, glob: GlobalConfig):
+        return IndexPage(load_toml_file(p), glob)
+
+    def __str__(self) -> str:
+        return pytomlpp.dumps({
+            'category_content_start': self.category_content_start,
+            'article_link_content': self.article_link_content,
+            'category_content_end': self.category_content_end,
+            'vars': self.vars
+        })
+
+
 def print_div():
     print('--------------------------------------------------\n')
 
