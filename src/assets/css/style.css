@@ -23,7 +23,15 @@
 }
 
 :root {
-  --font-family: Rubik, system-ui, sans-serif;
+  --pico-font-family: Rubik, system-ui, sans-serif;
+  --pico-block-spacing-vertical: 3rem;
+  --pico-block-spacing-horizontal: 2rem;
+  --pico-font-size: 122%;
+  --pico-border-radius: 0.7rem;
+}
+
+* {
+  --pico-typography-spacing-vertical: 1.4rem !important;
 }
 
 .blog-info-container {
@@ -33,6 +41,8 @@
   align-items: center;
   align-content: flex-start;
   height: fit-content;
+  margin-top: 1.1rem;
+  margin-bottom: 3rem;
 }
 
 .blog-icon {
@@ -42,17 +52,26 @@
 }
 
 .blog-name {
-  --font-family: ElMessiri-Bold, system-ui, sans-serif;
-  margin-bottom: 0.1rem;
+  --pico-font-family: ElMessiri-Bold, system-ui, sans-serif;
+  margin-bottom: 0.3rem;
 }
 
 .blog-desc {
-  --font-family: ElMessiri-SemiBold, system-ui, sans-serif;
+  --pico-font-family: ElMessiri-SemiBold, system-ui, sans-serif;
   margin-bottom: 0.0rem;
 }
 
-* {
-  --typography-spacing-vertical: 1.3rem !important;
+.container {
+  max-width: 62%;
+}
+
+p {
+  font-size: 105%;
+}
+
+footer {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
 }
 
 .social-link {
