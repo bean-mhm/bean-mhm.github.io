@@ -30,6 +30,13 @@
         phenomena with computers.
       </p>
       <p>
+        Here's a very basic ray tracer I wrote in JavaScript for fun. Click
+        <em>Render</em> to see how long your CPU takes to draw a sphere with
+        simple lighting.
+      </p>
+      <button id="rt-btn" onclick="basic_raytrace();">Render</button>
+      <br /><br />
+      <p>
         I made this blog to share the tiny amount of knowledge I've learned and
         different projects I work on. I might post about various other topics at
         times.
@@ -58,6 +65,298 @@
   </a>
 </footer>
   </main>
+
+  <script>
+    function insert_after(ref_node, new_node) {
+      ref_node.parentNode.insertBefore(new_node, ref_node.nextSibling);
+    }
+
+    function clamp(v, min, max) {
+      return Math.min(Math.max(v, min), max);
+    }
+
+    function remap01(v, inp_start, inp_end) {
+      return clamp((v - inp_start) / (inp_end - inp_start), 0., 1.);
+    }
+
+    function rgb_sweep(hue) {
+      let h = (360. * hue) % 360.;
+
+      let col = new Vec3([1, 0, 0]);
+      col = col.mix(new Vec3([1, 1, 0]), remap01(h, 0., 60.));
+      col = col.mix(new Vec3([0, 1, 0]), remap01(h, 60., 120.));
+      col = col.mix(new Vec3([0, 1, 1]), remap01(h, 120., 180.));
+      col = col.mix(new Vec3([0, 0, 1]), remap01(h, 180., 240.));
+      col = col.mix(new Vec3([1, 0, 1]), remap01(h, 240., 300.));
+      col = col.mix(new Vec3([1, 0, 0]), remap01(h, 300., 360.));
+
+      return col;
+    }
+
+    class Vec3 {
+      constructor(v) {
+        if (Array.isArray(v)) {
+          this.x = v[0];
+          this.y = v[1];
+          this.z = v[2];
+        } else {
+          this.x = v;
+          this.y = v;
+          this.z = v;
+        }
+      }
+
+      add(v) {
+        return new Vec3([this.x + v.x, this.y + v.y, this.z + v.z]);
+      }
+
+      sub(v) {
+        return new Vec3([this.x - v.x, this.y - v.y, this.z - v.z]);
+      }
+
+      mul(v) {
+        return new Vec3([this.x * v.x, this.y * v.y, this.z * v.z]);
+      }
+
+      div(v) {
+        return new Vec3([this.x / v.x, this.y / v.y, this.z / v.z]);
+      }
+
+      add_scalar(s) {
+        return new Vec3([this.x + s, this.y + s, this.z + s]);
+      }
+
+      sub_scalar(s) {
+        return new Vec3([this.x - s, this.y - s, this.z - s]);
+      }
+
+      mul_scalar(s) {
+        return new Vec3([this.x * s, this.y * s, this.z * s]);
+      }
+
+      div_scalar(s) {
+        return new Vec3([this.x / s, this.y / s, this.z / s]);
+      }
+
+      binary_op(v, f) {
+        return new Vec3([
+          f(this.x, v.x),
+          f(this.y, v.y),
+          f(this.z, v.z)
+        ]);
+      }
+
+      unary_op(f) {
+        return new Vec3([
+          f(this.x),
+          f(this.y),
+          f(this.z)
+        ]);
+      }
+
+      pow(v) {
+        return this.binary_op(v, Math.pow);
+      }
+
+      sqrt() {
+        return this.unary_op(Math.sqrt);
+      }
+
+      abs() {
+        return this.unary_op(Math.abs);
+      }
+
+      floor() {
+        return this.unary_op(Math.floor);
+      }
+
+      ceil() {
+        return this.unary_op(Math.ceil);
+      }
+
+      trunc() {
+        return this.unary_op(Math.trunc);
+      }
+
+      min(v) {
+        return this.binary_op(v, Math.min);
+      }
+
+      max(v) {
+        return this.binary_op(v, Math.max);
+      }
+
+      clamp(min, max) {
+        return this.unary_op(v => clamp(v, min, max));
+      }
+
+      mix(v, t) {
+        return this.add(v.sub(this).mul_scalar(t));
+      }
+
+      length_sq() {
+        return (this.x * this.x) + (this.y * this.y) + (this.z * this.z);
+      }
+
+      length() {
+        return Math.sqrt(this.length_sq());
+      }
+
+      distance_sq(v) {
+        return this.sub(v).length_sq();
+      }
+
+      distance(v) {
+        return this.sub(v).length();
+      }
+
+      dot(v) {
+        return (this.x * v.x) + (this.y * v.y) + (this.z * v.z);
+      }
+
+      normalized() {
+        return this.div_scalar(this.length());
+      }
+
+      min_component() {
+        return Math.min(Math.min(this.x, this.y), this.z);
+      }
+
+      max_component() {
+        return Math.max(Math.max(this.x, this.y), this.z);
+      }
+    }
+
+    class HitInfo {
+      constructor(hit, t, pos, normal) {
+        this.hit = hit;
+        this.t = t;
+        this.pos = pos;
+        this.normal = normal;
+      }
+    }
+
+    function ray_sphere(ro, rd, center, radius) {
+      let h = new HitInfo(false, null, null, null);
+
+      let ro_local = ro.sub(center)
+
+      let a = rd.dot(rd)
+      let b = 2. * ro_local.dot(rd);
+      let c = ro_local.dot(ro_local) - radius * radius;
+      let discriminant = (b * b) - (4. * a * c);
+
+      if (discriminant < 0.) {
+        return h;
+      }
+
+      let sqrt_d = Math.sqrt(discriminant);
+      let one_over_2a = .5 / a;
+      let t0 = (-b - sqrt_d) * one_over_2a;
+      let t1 = (-b + sqrt_d) * one_over_2a;
+
+      if (t0 < 0.) {
+        if (t1 < 0.) {
+          return h;
+        }
+        h.t = t1;
+      }
+      else {
+        h.t = t0;
+      }
+
+      h.hit = true;
+      h.pos = ro.add(rd.mul_scalar(h.t));
+      h.normal = h.pos.sub(center).div_scalar(radius);
+      return h;
+    }
+
+    function render(u, v, sphere_col) {
+      let col = new Vec3(0);
+
+      // generate a ray
+      let ro = new Vec3([0, -2, 0]);
+      let rd = new Vec3([u, 1, v]).normalized();
+
+      // ray-sphere intersection
+      let h = ray_sphere(ro, rd, new Vec3(0), 1.);
+
+      // shade
+      if (h.hit) {
+        const sun_dir = new Vec3([1.5, -1.5, 3]).normalized();
+        const sun_col = new Vec3(.9);
+
+        let intensity = .05 + Math.max(0., h.normal.dot(sun_dir));
+        col = sphere_col.mul(sun_col).mul_scalar(intensity);
+      } else {
+        col = new Vec3([.02, .1, .3]).mix(
+          new Vec3([.1, .4, .8]),
+          clamp(v * .5 + .5, 0., 1.)
+        );
+      }
+
+      // output
+      col = col.clamp(0., 1.);
+      col = col.pow(new Vec3(1. / 2.2));
+      return col;
+    }
+
+    function basic_raytrace() {
+      const width = 200;
+      const height = 120;
+
+      // create elements
+      if (!window.rt_created) {
+        window.rt_created = true;
+
+        let btn = document.getElementById("rt-btn");
+
+        window.rt_canvas = document.createElement("canvas");
+        window.rt_canvas.setAttribute("width", width.toString());
+        window.rt_canvas.setAttribute("height", height.toString());
+        window.rt_canvas.setAttribute("style", "margin-bottom: 0.4rem;");
+        insert_after(
+          btn.nextSibling.nextSibling.nextSibling,
+          window.rt_canvas
+        );
+
+        insert_after(window.rt_canvas, document.createElement("br"));
+
+        window.rt_time_div = document.createElement("div");
+        window.rt_time_div.setAttribute("class", "small-detail");
+        insert_after(
+          window.rt_canvas,
+          window.rt_time_div
+        );
+      }
+
+      // render
+      let ctx = window.rt_canvas.getContext("2d");
+      const img_data = ctx.getImageData(0, 0, width, height);
+      const buf = img_data.data;
+      let t_start = performance.now();
+      let sphere_col = rgb_sweep(Math.random()).mix(new Vec3(.5), .1);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          let u = (2. * (x + .5) - width) / Math.min(width, height);
+          let v = (2. * (height - y - 1 + .5) - height) / Math.min(width, height);
+
+          let col = render(u, v, sphere_col);
+
+          let red_idx = 4 * (x + y * width);
+          buf[red_idx + 0] = col.x * 255;
+          buf[red_idx + 1] = col.y * 255;
+          buf[red_idx + 2] = col.z * 255;
+          buf[red_idx + 3] = 255;
+        }
+      }
+      let render_time = performance.now() - t_start;
+      ctx.putImageData(img_data, 0, 0);
+
+      // show render time
+      window.rt_time_div.innerHTML = `that took ${render_time.toFixed(1)} ms`;
+    }
+  </script>
 </body>
 
 </html>
