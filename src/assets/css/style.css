@@ -23,7 +23,7 @@
 }
 
 :root {
-  --pico-font-size: 122%;
+  --pico-font-size: 120%;
   --pico-block-spacing-vertical: 3rem;
   --pico-block-spacing-horizontal: 2rem;
 }
@@ -102,18 +102,20 @@ p {
 }
 
 .blog-icon {
-  height: 4.5rem;
+  height: 4rem;
   aspect-ratio: 1/1;
-  margin-right: 1rem;
+  margin-right: 0.9rem;
 }
 
 .blog-name {
   --pico-font-family: ElMessiri-Bold, system-ui, sans-serif;
+  --pico-font-size: 1.65rem;
   margin-bottom: 0.3rem;
 }
 
 .blog-desc {
   --pico-font-family: ElMessiri-SemiBold, system-ui, sans-serif;
+  --pico-font-size: 1.2rem;
   margin-bottom: 0.0rem;
 }
 
