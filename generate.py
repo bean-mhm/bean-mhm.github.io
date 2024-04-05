@@ -181,9 +181,18 @@ def compile_index(
         # generate the article category list
         article_list = ''
         for category in categories:
+            if not category.visible:
+                continue
+
             category_content = index.category_content_start
 
+            n_visible_articles = 0
             for article in category.articles:
+                if article.visible:
+                    n_visible_articles += 1
+                else:
+                    continue
+
                 article_path_rel = Path(
                     os.path.relpath(article.out_path, out_path.parent)
                 ).as_posix()
@@ -201,6 +210,9 @@ def compile_index(
                     False
                 )
                 category_content += article_link_content
+
+            if n_visible_articles == 0:
+                category_content += index.category_empty_content
 
             category_content, _ = str_resolve_vars(
                 category_content,

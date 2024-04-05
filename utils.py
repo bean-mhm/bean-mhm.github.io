@@ -48,6 +48,7 @@ class Article:
     title: str
     author: str
     date: str
+    visible: bool
     contents: str
     vars: dict
     out_path: Path
@@ -69,6 +70,7 @@ class Article:
         dt = datetime.strptime(self.date, '%Y-%m-%d')
         self.date_alt = f'{dt.strftime("%b")} {dt.day}, {dt.year}'
 
+        self.visible = bool(data_copy['article_visible'])
         self.contents = str(data_copy['article_contents'])
         self.vars = data_copy['vars']
         self.out_path = Path()
@@ -109,12 +111,14 @@ class ArticleCategory:
     id: str
     name: str
     desc: str
+    visible: bool
     articles: list[Article]
 
     def __init__(self, data: dict):
         self.id = str(data['category_id']).strip().lower()
         self.name = str(data['category_name']).strip()
         self.desc = str(data['category_desc']).strip()
+        self.visible = bool(data['category_visible'])
         self.articles = []
 
     def from_str(s):
@@ -136,6 +140,7 @@ class IndexPage:
     glob: GlobalConfig
     category_content_start: str
     article_link_content: str
+    category_empty_content: str
     category_content_end: str
     vars: dict
 
@@ -150,6 +155,7 @@ class IndexPage:
 
         self.category_content_start = str(data_copy['category_content_start'])
         self.article_link_content = str(data_copy['article_link_content'])
+        self.category_empty_content = str(data_copy['category_empty_content'])
         self.category_content_end = str(data_copy['category_content_end'])
         self.vars = data_copy['vars']
 
@@ -158,6 +164,7 @@ class IndexPage:
             {
                 'category_content_start': self.category_content_start,
                 'article_link_content': self.article_link_content,
+                'category_empty_content': self.category_empty_content,
                 'category_content_end': self.category_content_end
             },
             False
@@ -173,6 +180,7 @@ class IndexPage:
         return pytomlpp.dumps({
             'category_content_start': self.category_content_start,
             'article_link_content': self.article_link_content,
+            'category_empty_content': self.category_empty_content,
             'category_content_end': self.category_content_end,
             'vars': self.vars
         })
