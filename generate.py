@@ -102,6 +102,8 @@ def compile_articles(
                             'root_path': root_path_rel,
                             'article_id': article.id,
                             'article_title': article.title,
+                            'article_author': article.author,
+                            'article_date': article.date,
                             'article_contents': article.contents
                         },
                         False
@@ -188,6 +190,8 @@ def compile_index(
                     {
                         'article_id': article.id,
                         'article_title': article.title,
+                        'article_author': article.author,
+                        'article_date': article.date,
                         'article_contents': article.contents,
                         'article_path': article_path_rel
                     },

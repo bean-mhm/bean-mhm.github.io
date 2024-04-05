@@ -1,5 +1,7 @@
 article_id = "what-is-film"
 article_title = "What is Film?"
+article_author = "$-blog_author-$"
+article_date = "2024-04-04"
 article_contents = """
 <p>
   The static site generator script is still under work so this is placeholder text I hope you're having a nice day.

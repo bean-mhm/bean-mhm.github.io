@@ -5,6 +5,7 @@ category_content_start = """
 
 article_link_content = """
 <a href="$--article_path--$" target="_blank">$--article_title--$</a>
+<span class="small-detail"> — $--article_author--$, $--article_date--$</span>
 <br />
 """
 

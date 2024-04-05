@@ -44,6 +44,8 @@ class Article:
     glob: GlobalConfig
     id: str
     title: str
+    author: str
+    date: str
     contents: str
     vars: dict
     out_path: Path
@@ -59,6 +61,8 @@ class Article:
 
         self.id = str(data_copy['article_id']).strip().lower()
         self.title = str(data_copy['article_title']).strip()
+        self.author = str(data_copy['article_author']).strip()
+        self.date = str(data_copy['article_date']).strip()
         self.contents = str(data_copy['article_contents'])
         self.vars = data_copy['vars']
         self.out_path = Path()
@@ -68,6 +72,8 @@ class Article:
             {
                 'article_id': self.id,
                 'article_title': self.title,
+                'article_author': self.author,
+                'article_date': self.date,
                 'article_contents': self.contents
             },
             False
@@ -83,6 +89,8 @@ class Article:
         return pytomlpp.dumps({
             'article_id': self.id,
             'article_title': self.title,
+            'article_author': self.author,
+            'article_date': self.date,
             'article_contents': self.contents,
             'vars': self.vars,
             'out_path': str(self.out_path)
