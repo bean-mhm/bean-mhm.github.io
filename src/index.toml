@@ -11,6 +11,8 @@ article_link_content = """
 </p>
 """
 
+category_empty_content = "<p>Stay tuned!</p>"
+
 category_content_end = ""
 
 [vars]
