@@ -166,15 +166,15 @@ footer {
 
 .social-link {
   display: inline-block;
-  margin-left: 0.7rem;
+  margin-left: 0.75rem;
 }
 
 .social-icon {
-  height: 1.7rem;
+  height: 1.8rem;
   aspect-ratio: 1/1;
 }
 
 .social-icon-long {
-  height: 1.7rem;
+  height: 1.8rem;
   width: auto;
 }
