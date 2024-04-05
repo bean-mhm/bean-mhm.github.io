@@ -33,7 +33,7 @@ def compile_articles(
         raise Exception('articles directory "{articles_path}" doesn\'t exist')
 
     # iterate through the articles source directory
-    for p in articles_path.iterdir():
+    for p in iterdir_sorted(articles_path):
         # find a category
         if not p.is_dir():
             continue
@@ -53,7 +53,7 @@ def compile_articles(
         article_ids = set()
 
         # iterate through the articles in the category
-        for p2 in p.iterdir():
+        for p2 in iterdir_sorted(p):
             # find an article
             if p2.is_dir():
                 continue

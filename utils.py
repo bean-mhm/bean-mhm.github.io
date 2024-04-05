@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 import shutil
 import errno
+import re
 
 import pytomlpp
 
@@ -322,3 +323,24 @@ def str_resolve_load_src(s: str, src_path: Path) -> tuple[str, int]:
         start_pos = path_end_pos + len(end_trigger)
 
     return s, n_replaced
+
+
+# https://stackoverflow.com/a/5967539
+def try_str_to_int(s):
+    return int(s) if s.isdigit() else s
+
+
+# https://stackoverflow.com/a/5967539
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [try_str_to_int(c) for c in re.split(r'(\d+)', text)]
+
+
+def iterdir_sorted(p: Path) -> list[Path]:
+    s_list = [str(item) for item in p.iterdir()]
+    s_list.sort(key=natural_keys)
+    return [Path(s) for s in s_list]
