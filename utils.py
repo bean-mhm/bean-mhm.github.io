@@ -331,16 +331,20 @@ def try_str_to_int(s):
 
 
 # https://stackoverflow.com/a/5967539
-def natural_keys(text):
+def natural_keys(s):
     '''
     alist.sort(key=natural_keys) sorts in human order
     http://nedbatchelder.com/blog/200712/human_sorting.html
     (See Toothy's implementation in the comments)
     '''
-    return [try_str_to_int(c) for c in re.split(r'(\d+)', text)]
+    return [try_str_to_int(c) for c in re.split(r'(\d+)', s)]
+
+
+def natural_keys_for_iterdir(item):
+    return natural_keys(str(item.parts[-1]))
 
 
 def iterdir_sorted(p: Path) -> list[Path]:
-    s_list = [str(item) for item in p.iterdir()]
-    s_list.sort(key=natural_keys)
-    return [Path(s) for s in s_list]
+    items = list(p.iterdir())
+    items.sort(key=natural_keys_for_iterdir)
+    return items
