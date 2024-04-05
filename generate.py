@@ -1,5 +1,6 @@
 # import resource # unix
 import sys
+import locale
 import time
 
 from pathlib import Path
@@ -286,6 +287,9 @@ def generate_site():
     # increase max stack size and recursion depth
     # resource.setrlimit(resource.RLIMIT_STACK, (2**31, -1)) # unix
     sys.setrecursionlimit(1_000_000)
+
+    # set locale
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
     # work in the source directory
     src_path = Path('./src').resolve()
