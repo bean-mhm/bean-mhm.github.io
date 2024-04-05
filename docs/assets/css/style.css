@@ -128,12 +128,16 @@ p {
   }
 }
 
+p.article-link {
+  line-height: 1.4rem;
+}
+
 .article-title {
   margin-bottom: 0.5rem;
 }
 
 .small-detail {
-  font-size: 90%;
+  font-size: 85%;
   font-weight: lighter;
 }
 

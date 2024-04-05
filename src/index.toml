@@ -4,11 +4,13 @@ category_content_start = """
 """
 
 article_link_content = """
+<p class="article-link">
 <a href="$--article_path--$" target="_blank">$--article_title--$</a>
-<span class="small-detail"> — $--article_author--$ • $--article_date_alt--$</span>
 <br />
+<span class="small-detail">$--article_author--$ • $--article_date_alt--$</span>
+</p>
 """
 
-category_content_end = "<br /><br />"
+category_content_end = ""
 
 [vars]
