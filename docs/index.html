@@ -314,7 +314,11 @@
         window.rt_canvas = document.createElement("canvas");
         window.rt_canvas.setAttribute("width", width.toString());
         window.rt_canvas.setAttribute("height", height.toString());
-        window.rt_canvas.setAttribute("style", "margin-bottom: 0.4rem;");
+        window.rt_canvas.setAttribute(
+          "style",
+          "margin-bottom: 0.4rem; width: 15rem; height: auto;"
+          + "image-rendering: smooth;"
+        );
         insert_after(
           btn.nextSibling.nextSibling.nextSibling,
           window.rt_canvas
