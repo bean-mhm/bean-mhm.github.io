@@ -1,5 +1,6 @@
 import copy
 import time
+from datetime import datetime
 
 from pathlib import Path
 import shutil
@@ -62,7 +63,11 @@ class Article:
         self.id = str(data_copy['article_id']).strip().lower()
         self.title = str(data_copy['article_title']).strip()
         self.author = str(data_copy['article_author']).strip()
+
         self.date = str(data_copy['article_date']).strip()
+        dt = datetime.strptime(self.date, '%Y-%m-%d')
+        self.date_alt = f'{dt.strftime("%b")} {dt.day}, {dt.year}'
+
         self.contents = str(data_copy['article_contents'])
         self.vars = data_copy['vars']
         self.out_path = Path()
@@ -74,6 +79,7 @@ class Article:
                 'article_title': self.title,
                 'article_author': self.author,
                 'article_date': self.date,
+                'article_date_alt': self.date_alt,
                 'article_contents': self.contents
             },
             False
@@ -91,6 +97,7 @@ class Article:
             'article_title': self.title,
             'article_author': self.author,
             'article_date': self.date,
+            'article_date_alt': self.date_alt,
             'article_contents': self.contents,
             'vars': self.vars,
             'out_path': str(self.out_path)
