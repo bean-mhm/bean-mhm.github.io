@@ -185,3 +185,40 @@ code {
   --pico-line-height: 1.2;
   line-height: 1.2;
 }
+
+.article-nav-container {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  margin-top: 4rem;
+
+  background-color: rgba(0, 0, 0, .13);
+  padding: 1rem 1.7rem 1rem 1.7rem;
+  border-radius: 10rem;
+}
+
+.prev-article-link {
+  margin-right: 0.4rem;
+  text-decoration: none !important;
+  transition: color 0.15s;
+  color: #25DDDD;
+}
+
+.prev-article-link:hover {
+  text-decoration: none !important;
+  color: #58FAF9;
+  cursor: pointer;
+}
+
+.next-article-link {
+  margin-left: 0.4rem;
+  text-decoration: none !important;
+  transition: color 0.15s;
+  color: #25DDDD;
+}
+
+.next-article-link:hover {
+  text-decoration: none !important;
+  color: #58FAF9;
+  cursor: pointer;
+}

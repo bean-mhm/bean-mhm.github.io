@@ -88,6 +88,12 @@ def compile_articles(
     s_elapsed = elapsed_since(t_start_analyze)
     print(f'found {n_articles} articles in {s_elapsed}\n')
 
+    # load the article navigation config
+    t_start_load_nav = time.time()
+    nav = ArticleNavConfig.from_path(src_path / 'article_nav.toml')
+    s_elapsed = elapsed_since(t_start_load_nav)
+    print(f'loaded the article navigation config in {s_elapsed}\n')
+
     t_start_compile = time.time()
 
     # write the output files
@@ -104,6 +110,38 @@ def compile_articles(
             t_start_article = time.time()
 
             with open(article.out_path, mode='w', encoding='utf8') as out_file:
+                # do we have a previous article?
+                prev_visible_idx = i
+                while True:
+                    prev_visible_idx -= 1
+                    if prev_visible_idx < 0:
+                        break
+                    if category.articles[prev_visible_idx].visible:
+                        break
+                has_prev = prev_visible_idx >= 0
+
+                # do we have a next article?
+                next_visible_idx = i
+                while True:
+                    next_visible_idx += 1
+                    if next_visible_idx >= len(category.articles):
+                        break
+                    if category.articles[next_visible_idx].visible:
+                        break
+                has_next = next_visible_idx < len(category.articles)
+
+                # article navigation content
+                nav_content = nav.content_start
+                if has_prev:
+                    nav_content += nav.prev_article_link_content
+                else:
+                    nav_content += nav.no_prev_content
+                if has_next:
+                    nav_content += nav.next_article_link_content
+                else:
+                    nav_content += nav.no_next_content
+                nav_content += nav.content_end
+
                 # start with the template
                 out_data = article_template
 
@@ -124,11 +162,52 @@ def compile_articles(
                             'article_author': article.author,
                             'article_date': article.date,
                             'article_date_alt': article.date_alt,
-                            'article_contents': article.contents
+                            'article_contents': article.contents,
+                            'article_nav_content': nav_content
                         },
                         False
                     )
                     n_total_replaced += n_replaced
+
+                    if has_prev:
+                        prev: Article = category.articles[prev_visible_idx]
+                        prev_path_rel = Path(os.path.relpath(
+                            prev.out_path,
+                            article.out_path.parent
+                        )).as_posix()
+                        out_data, n_replaced = str_resolve_vars(
+                            out_data,
+                            {
+                                'prev_article_id': prev.id,
+                                'prev_article_title': prev.title,
+                                'prev_article_author': prev.author,
+                                'prev_article_date': prev.date,
+                                'prev_article_date_alt': prev.date_alt,
+                                'prev_article_path': prev_path_rel
+                            },
+                            False
+                        )
+                        n_total_replaced += n_replaced
+
+                    if has_next:
+                        next: Article = category.articles[next_visible_idx]
+                        next_path_rel = Path(os.path.relpath(
+                            next.out_path,
+                            article.out_path.parent
+                        )).as_posix()
+                        out_data, n_replaced = str_resolve_vars(
+                            out_data,
+                            {
+                                'next_article_id': next.id,
+                                'next_article_title': next.title,
+                                'next_article_author': next.author,
+                                'next_article_date': next.date,
+                                'next_article_date_alt': next.date_alt,
+                                'next_article_path': next_path_rel
+                            },
+                            False
+                        )
+                        n_total_replaced += n_replaced
 
                     out_data, n_replaced = str_resolve_vars(
                         out_data,
@@ -206,9 +285,10 @@ def compile_index(
                 else:
                     continue
 
-                article_path_rel = Path(
-                    os.path.relpath(article.out_path, out_path.parent)
-                ).as_posix()
+                article_path_rel = Path(os.path.relpath(
+                    article.out_path,
+                    out_path.parent
+                )).as_posix()
                 article_link_content, _ = str_resolve_vars(
                     index.article_link_content,
                     {

@@ -1,5 +1,19 @@
-article_nav_content_start = "AAA"
-article_nav_prev_article_link_content = "BBB"
-article_nav_content_middle = "CCC"
-article_nav_next_article_link_content = "DDD"
-article_nav_content_end = "EEE"
+article_nav_content_start = """<div class="article-nav-container">"""
+
+article_nav_prev_article_link_content = """
+<a class="prev-article-link" href="$--prev_article_path--$" title="Previous article: $--prev_article_title--$">← $--prev_article_title--$</a>
+"""
+
+article_nav_no_prev_content = """
+<div> </div>
+"""
+
+article_nav_next_article_link_content = """
+<a class="next-article-link" href="$--next_article_path--$" title="Next article: $--next_article_title--$">$--next_article_title--$ →</a>
+"""
+
+article_nav_no_next_content = """
+<div> </div>
+"""
+
+article_nav_content_end = "</div>"

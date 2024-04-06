@@ -141,8 +141,9 @@ class ArticleCategory:
 class ArticleNavConfig:
     content_start: str
     prev_article_link_content: str
-    content_middle: str
+    no_prev_content: str
     next_article_link_content: str
+    no_next_content: str
     content_end: str
 
     def __init__(self, data: dict):
@@ -150,10 +151,11 @@ class ArticleNavConfig:
         self.prev_article_link_content = str(
             data['article_nav_prev_article_link_content']
         )
-        self.content_middle = str(data['article_nav_content_middle'])
+        self.no_prev_content = str(data['article_nav_no_prev_content'])
         self.next_article_link_content = str(
             data['article_nav_next_article_link_content']
         )
+        self.no_next_content = str(data['article_nav_no_next_content'])
         self.content_end = str(data['article_nav_content_end'])
 
     def from_str(s):
@@ -166,8 +168,9 @@ class ArticleNavConfig:
         return pytomlpp.dumps({
             'content_start': self.content_start,
             'prev_article_link_content': self.prev_article_link_content,
-            'content_middle': self.content_middle,
+            'no_prev_content': self.no_prev_content,
             'next_article_link_content': self.next_article_link_content,
+            'no_next_content': self.no_next_content,
             'content_end': self.content_end
         })
 
