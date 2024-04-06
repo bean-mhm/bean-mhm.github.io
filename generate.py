@@ -131,16 +131,18 @@ def compile_articles(
                 has_next = next_visible_idx < len(category.articles)
 
                 # article navigation content
-                nav_content = nav.content_start
-                if has_prev:
-                    nav_content += nav.prev_article_link_content
-                else:
-                    nav_content += nav.no_prev_content
-                if has_next:
-                    nav_content += nav.next_article_link_content
-                else:
-                    nav_content += nav.no_next_content
-                nav_content += nav.content_end
+                nav_content = ''
+                if has_prev or has_next:
+                    nav_content = nav.content_start
+                    if has_prev:
+                        nav_content += nav.prev_article_link_content
+                    else:
+                        nav_content += nav.no_prev_content
+                    if has_next:
+                        nav_content += nav.next_article_link_content
+                    else:
+                        nav_content += nav.no_next_content
+                    nav_content += nav.content_end
 
                 # start with the template
                 out_data = article_template
