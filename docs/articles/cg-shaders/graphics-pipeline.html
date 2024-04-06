@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
 <link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
   <title>The Graphics Pipeline</title>
 </head>
 
@@ -24,7 +26,46 @@
       <div class="small-detail">bean • Apr 6, 2024</div>
       <br />
       <p>
-  The static site generator script is still under work so this is placeholder text I hope you're having a nice day.
+  Have you ever wondered how your computer draws different shapes and images
+  tens of times a second? Ever wondered how video games render life-like scenes
+  at 60 frames per second? Or, how your browser draws those rounded rectangles
+  for the buttons, or how your operating system draws its windows?
+</p>
+
+<h2>The GPU</h2>
+<p>
+  You might already know that your computer needs a GPU, a graphics processing
+  unit, to draw stuff onto the screen. But why's that the case? Well, there are
+  several good reasons to do it that way. Firstly, your monitor needs some sort
+  of input signal to display anything. Some use HDMI ports, older ones might use
+  VGA, and so on. Now, these interfaces have different protocols that specify
+  how the input signal should be encoded. So how do we send image data from our
+  CPU to the display device? One idea might be to just write software for the
+  CPU implementing a video protocol and somehow connecting the display device to
+  the CPU. But, as it turns out, this method is really inefficient because the
+  CPU needs to spend most of its time encoding the video signal, and this gets
+  worse if there's only a single core, as was common in the early days.
+</p>
+
+<p>
+  A better method is to use an entirely separate device to encode the video
+  signal, such that the CPU sends raw image data to that device, and the device
+  can freely spend all of its time encoding the video signal and sending it to
+  the display device. Said device is what we call a graphics card. Note that
+  it doesn't necessarily need to have fancy rendering functionality and ray
+  tracing cores. Just taking raw pixel data and encoding them into a video
+  signal is enough to be called a graphics card.
+</p>
+
+<p>
+  This was the first reason to make graphics cards, but then, we quickly
+  realized that we need a lot of parallelism to draw even simple 2D graphics.
+  More specifically, we need to run the same instructions on all pixels at once,
+  like a nested for loop:
+<pre><code class="language-python">for y in range(height):
+    for x in range(width):
+    		pixels[y][x] = ...
+</code></pre>
 </p>
 
 <h2>Some Topic</h2>
@@ -46,6 +87,8 @@
   </a>
 </footer>
   </main>
+
+  <script>hljs.highlightAll();</script>
 </body>
 
 </html>
