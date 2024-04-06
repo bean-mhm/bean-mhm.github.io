@@ -1,0 +1,5 @@
+article_nav_content_start = "AAA"
+article_nav_prev_article_link_content = "BBB"
+article_nav_content_middle = "CCC"
+article_nav_next_article_link_content = "DDD"
+article_nav_content_end = "EEE"

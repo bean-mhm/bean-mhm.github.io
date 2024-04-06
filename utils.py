@@ -138,6 +138,40 @@ class ArticleCategory:
         })
 
 
+class ArticleNavConfig:
+    content_start: str
+    prev_article_link_content: str
+    content_middle: str
+    next_article_link_content: str
+    content_end: str
+
+    def __init__(self, data: dict):
+        self.content_start = str(data['article_nav_content_start'])
+        self.prev_article_link_content = str(
+            data['article_nav_prev_article_link_content']
+        )
+        self.content_middle = str(data['article_nav_content_middle'])
+        self.next_article_link_content = str(
+            data['article_nav_next_article_link_content']
+        )
+        self.content_end = str(data['article_nav_content_end'])
+
+    def from_str(s):
+        return ArticleNavConfig(load_toml_str(s))
+
+    def from_path(p):
+        return ArticleNavConfig(load_toml_file(p))
+
+    def __str__(self) -> str:
+        return pytomlpp.dumps({
+            'content_start': self.content_start,
+            'prev_article_link_content': self.prev_article_link_content,
+            'content_middle': self.content_middle,
+            'next_article_link_content': self.next_article_link_content,
+            'content_end': self.content_end
+        })
+
+
 class IndexPage:
     glob: GlobalConfig
     category_content_start: str
