@@ -20,20 +20,21 @@ class GlobalConfig:
     root_path: Path
     vars: dict
 
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, ref_path: Path):
         data_copy = copy.deepcopy(data)
 
         _cfg_verify_vars(data_copy)
         _cfg_resolve_vars(data_copy, data_copy['vars'], True)
+        _cfg_resolve_load(data_copy, 'load', Path(ref_path).parent)
         self.vars = data_copy['vars']
 
         self.root_path = Path(data_copy['root_path']).resolve()
 
-    def from_str(s):
-        return GlobalConfig(load_toml_str(s))
+    def from_str(s, ref_path: Path):
+        return GlobalConfig(load_toml_str(s, ref_path))
 
     def from_path(p):
-        return GlobalConfig(load_toml_file(p))
+        return GlobalConfig(load_toml_file(p), p)
 
     def __str__(self) -> str:
         return pytomlpp.dumps({
@@ -53,7 +54,7 @@ class Article:
     vars: dict
     out_path: Path
 
-    def __init__(self, data: dict, glob: GlobalConfig):
+    def __init__(self, data: dict, glob: GlobalConfig, ref_path: Path):
         self.glob = glob
 
         data_copy = copy.deepcopy(data)
@@ -61,6 +62,7 @@ class Article:
         _cfg_verify_vars(data_copy)
         _cfg_resolve_vars(data_copy, data_copy['vars'], True)
         _cfg_resolve_vars(data_copy, glob.vars, True)
+        _cfg_resolve_load(data_copy, 'load', Path(ref_path).parent)
 
         self.id = str(data_copy['article_id']).strip().lower()
         self.title = str(data_copy['article_title']).strip()
@@ -88,11 +90,11 @@ class Article:
             False
         )
 
-    def from_str(s, glob: GlobalConfig):
-        return Article(load_toml_str(s), glob)
+    def from_str(s, glob: GlobalConfig, ref_path: Path):
+        return Article(load_toml_str(s), glob, ref_path)
 
     def from_path(p, glob: GlobalConfig):
-        return Article(load_toml_file(p), glob)
+        return Article(load_toml_file(p), glob, p)
 
     def __str__(self) -> str:
         return pytomlpp.dumps({
@@ -144,7 +146,7 @@ class IndexPage:
     category_content_end: str
     vars: dict
 
-    def __init__(self, data: dict, glob: GlobalConfig):
+    def __init__(self, data: dict, glob: GlobalConfig, ref_path: Path):
         self.glob = glob
 
         data_copy = copy.deepcopy(data)
@@ -152,6 +154,7 @@ class IndexPage:
         _cfg_verify_vars(data_copy)
         _cfg_resolve_vars(data_copy, data_copy['vars'], True)
         _cfg_resolve_vars(data_copy, glob.vars, True)
+        _cfg_resolve_load(data_copy, 'load', Path(ref_path).parent)
 
         self.category_content_start = str(data_copy['category_content_start'])
         self.article_link_content = str(data_copy['article_link_content'])
@@ -170,11 +173,11 @@ class IndexPage:
             False
         )
 
-    def from_str(s, glob: GlobalConfig):
-        return IndexPage(load_toml_str(s), glob)
+    def from_str(s, glob: GlobalConfig, ref_path: Path):
+        return IndexPage(load_toml_str(s), glob, ref_path)
 
     def from_path(p, glob: GlobalConfig):
-        return IndexPage(load_toml_file(p), glob)
+        return IndexPage(load_toml_file(p), glob, p)
 
     def __str__(self) -> str:
         return pytomlpp.dumps({
@@ -226,7 +229,7 @@ def load_toml_file(p) -> dict:
     return pytomlpp.loads(read_file(p))
 
 
-# * returns the number of replacements
+# * returns the number of replacements.
 def replace_recursive(data: dict, replace_what: str, replace_with: str) -> int:
     n_replaced = 0
     for k, v in data.items():
@@ -281,7 +284,7 @@ def _cfg_resolve_vars(data: dict, vars: dict, user_defined: bool):
 
 
 # use key-value pairs from vars to modify values in s
-# * returns tuple with the result and the number of replacements
+# * returns tuple with the result and the number of replacements.
 def str_resolve_vars(
     s: str,
     vars: dict,
@@ -297,13 +300,17 @@ def str_resolve_vars(
     return s, n_replaced
 
 
-# find places in s where we need to load text from a source file
-# * the paths referenced must be relative to the source directory and they
-#   shouldn't start with a slash
-# * example: $--load_src--$("templates/item.html")
-# * returns tuple with the result and the number of replacements
-def str_resolve_load_src(s: str, src_path: Path) -> tuple[str, int]:
-    start_trigger = get_var_format(False).format('load_src') + '("'
+# find places in s where we need to load text from an external file
+# * example: $--trigger-word--$("content.html")
+# * the paths referenced must be relative to start_path and they shouldn't start
+#   with a slash.
+# * returns tuple with the result and the number of replacements.
+def str_resolve_load(
+    s: str,
+    trigger: str,
+    start_path: Path
+) -> tuple[str, int]:
+    start_trigger = get_var_format(False).format(trigger) + '("'
     end_trigger = '")'
     start_pos = 0
     n_replaced = 0
@@ -317,7 +324,7 @@ def str_resolve_load_src(s: str, src_path: Path) -> tuple[str, int]:
         if path_end_pos == -1:
             raise Exception('unclosed path')
 
-        path = src_path / Path(
+        path = start_path / Path(
             s[path_start_pos:path_end_pos]
         )
         content = read_file(path)
@@ -331,6 +338,41 @@ def str_resolve_load_src(s: str, src_path: Path) -> tuple[str, int]:
         start_pos = path_end_pos + len(end_trigger)
 
     return s, n_replaced
+
+
+# see str_resolve_load()
+# * returns the number of replacements.
+def resolve_load_recursive(
+    data: dict,
+    trigger: str,
+    start_path: Path
+) -> int:
+    n_replaced_total = 0
+    for k, v in data.items():
+        if isinstance(v, dict):
+            replace_recursive(v, trigger, start_path)
+        elif type(v) is list:
+            replace_recursive(
+                {i: v for i, v in enumerate(v)},
+                trigger,
+                start_path
+            )
+        elif type(v) is str:
+            data[k], n_replaced = str_resolve_load(data[k], trigger, start_path)
+            n_replaced_total += n_replaced
+    return n_replaced_total
+
+
+# see str_resolve_load()
+def _cfg_resolve_load(data: dict, trigger: str, start_path: Path):
+    n_resolved = 0
+    while (True):
+        if n_resolved > MAX_VAR_RES:
+            raise Exception(ERR_MAX_VAR_RES)
+        n_replaced = resolve_load_recursive(data, trigger, start_path)
+        if (n_replaced < 1):
+            break
+        n_resolved += 1
 
 
 # https://stackoverflow.com/a/5967539

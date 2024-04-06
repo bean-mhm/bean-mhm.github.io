@@ -126,8 +126,9 @@ def compile_articles(
                     )
                     n_total_replaced += n_replaced
 
-                    out_data, n_replaced = str_resolve_load_src(
+                    out_data, n_replaced = str_resolve_load(
                         out_data,
+                        'load_src',
                         src_path
                     )
                     n_total_replaced += n_replaced
@@ -260,7 +261,11 @@ def compile_index(
             )
             n_total_replaced += n_replaced
 
-            out_data, n_replaced = str_resolve_load_src(out_data, src_path)
+            out_data, n_replaced = str_resolve_load(
+                out_data,
+                'load_src',
+                src_path
+            )
             n_total_replaced += n_replaced
 
             if (n_total_replaced < 1):
