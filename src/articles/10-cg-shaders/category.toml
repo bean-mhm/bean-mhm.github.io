@@ -1,0 +1,4 @@
+category_id = "cg-shaders"
+category_name = "Computer Graphics"
+category_desc = "Learn how 2D/3D rendering works under the hood and how you can write your very own shaders in GLSL."
+category_visible = true
