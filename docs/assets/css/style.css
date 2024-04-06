@@ -20,6 +20,8 @@
 
 * {
   --pico-typography-spacing-vertical: 1.4rem !important;
+  --pico-line-height: 1.55;
+  line-height: 1.55;
 }
 
 :root {
@@ -177,4 +179,9 @@ footer {
 .social-icon-long {
   height: 1.8rem;
   width: auto;
+}
+
+code {
+  --pico-line-height: 1.2;
+  line-height: 1.2;
 }

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>Why a CPU is Not Enough</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">Why a CPU is Not Enough</h1>
+      <div class="small-detail">bean • Apr 6, 2024</div>
+      <br />
+      <p>
+  Have you ever wondered how your computer draws different shapes and images
+  tens of times a second? Ever wondered how video games render life-like scenes
+  in real-time, or how your operating system draws its windows?
+</p>
+
+<h2>Encoding Video Signals</h2>
+<p>
+  You might already know that your computer needs a GPU, graphics processing
+  unit, to draw stuff onto the screen, but why's that the case? Can't we just
+  use the CPU to achieve the same thing? Well, not really. Firstly, your monitor
+  needs some sort of input signal to display anything. Some use HDMI ports,
+  older ones might use VGA, and so on. These interfaces have different protocols
+  that specify how the input signal should be encoded. So how do we send image
+  data from our CPU to the display device? One idea might be to just write some
+  software for the CPU implementing a video protocol and somehow connecting the
+  display device to the CPU. But, as it turns out, this method is really
+  inefficient because the CPU needs to spend most of its time encoding the video
+  signal, and this gets worse if there's only a single core, as was common in
+  the early days of computers.
+</p>
+<p>
+  A better method is to use an entirely separate device to encode the video
+  signal, such that the CPU sends raw image data to that device and continues
+  to work on other stuff while the device can freely spend all of its time
+  encoding the video signal and sending it to the display device. Said device is
+  what we call a graphics card. Note that it doesn't necessarily need to have
+  fancy rendering features and ray tracing cores. Just taking raw pixel data and
+  encoding them into a video signal is enough to be called a graphics card.
+</p>
+<h2>Updating Millions of Pixels in Parallel</h2>
+<p>
+  Video signal encoding was the first reason to make graphics cards, but then,
+  we quickly realized that we need a lot of parallelism to draw even simple 2D
+  graphics. More specifically, we need to run the same instructions on all
+  pixels at once, like a nested <em>for loop</em>. Take a look at this
+  pseudocode.
+</p>
+
+<pre><code class="language-python">class Color:
+    red: float
+    green: float
+    blue: float
+    
+    ...
+
+
+def calculate_pixel_color(x: int, y: int) -> Color:
+    ...
+
+
+for y in range(height):
+    for x in range(width):
+        pixels[y][x] = calculate_pixel_color(x, y)</code></pre>
+
+<p>
+  Notice how the <code>calculate_pixel_color()</code> function only depends on
+  the coordinates of the pixel it needs to shade and is independent from
+  everything else. This independence is key to parallelism, and to help you
+  better understand why that's the case, let's look at the following pseudocode.
+</p>
+
+<pre><code class="language-python">def calculate_pixel_color(x: int, y: int) -> Color:
+    return new Color(
+      x * y,
+      80,
+      x + y
+    )</code></pre>
+
+<p>
+  Suppose our image has 200 pixels in the horizontal direction and 100 in the
+  vertical direction. Now, imagine we have 200*100=20,000 RGB lamps each with 3
+  knobs (for the red, green, and blue intensities) in a huge field, and a
+  tireless worker for every single lamp. Every worker knows the exact
+  coordinates of his lamp. "Tune the red knob until it shows the product of the
+  X and Y coordinates of your particular lamp.", we say to the workers. Then, we
+  tell them to tune the green knob to 80, and finally we tell them to add the X
+  and Y coordinates of their lamp and adjust the blue knob to the resulting
+  value. Our workers are really fast and they perform these instructions in just
+  a few milliseconds.
+</p>
+<p>
+  To really pinpoint what we mean by independent instructions, we tell the
+  workers to sum up all the values from their neighbors and embed the result in
+  their own lamps, at once. Standing still, they look all confused. "What order
+  do we start in? How can I sum up the values from my neighbors if they also
+  need to sum up the values from <em>their</em> neighbors, which includes me?!
+  You have lost your mind, we can't do this all at once!", they say. And they're
+  in the right. What we asked them was to perform a calculation on each lamp in
+  parallel where the calculation depends on the other lamps.
+</p>
+<img src="../../assets/images/articles/parallel-lamps.svg"
+  alt="independent RGB lamps being altered in parallel" title="independent RGB lamps being altered in parallel"
+  style="height: 32rem; width: auto;" />
+<p>
+  All of this is to say, parallelism matters a lot, and, if we can find a way to
+  <em>parallelize</em> our instructions instead of running them on each pixel
+  one-by-one, we can run them a lot faster.
+</p>
+<p>
+  Or, can we?
+</p>
+<h2>Shaders</h2>
+<p>
+  You might have already guessed that a CPU can't really perform the same
+  instruction on dozens of pixels at once. Sure, modern CPUs have multiple cores
+  and <abbr data-tooltip="Single Instruction, Multiple Data">SIMD</abbr>, but
+  they're not quite fast enough to render realistic scenes at 60 frames per
+  second. This led to the creation of shaders on graphics card, which let you
+  run the same instruction on all pixels at once. Well, it's a bit more
+  complicated than that and there is still some amount of <em>serial</em> work,
+  but for the sake of simplicity we'll assume all pixels are processed at once.
+</p>
+<p>
+  In the next article, we'll make a very simple gradient shader from scratch.
+</p>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+<p>
+  Remember the <code>calculate_pixel_color()</code> function from the
+  <a href="$--prev_article_link--$" title="$--prev_article_title--$" target="_blank">previous article</a>?
+  Let's modify it so that it produces a blue-to-yellow gradient from left to
+  right. Can you figure out how we can do this while only knowing the X and Y
+  coordinates (and the width and height of the image)? Try to think about it for
+  a bit, and come back when you're ready.
+</p>
+<h2>Linear Interpolation</h2>
+<p>
+  Ok, here's the spoiler. What we want is for the left-most pixels to have RGB
+  values of <code>(0, 0, 1)</code> representing blue, and for the pixels at the
+  right side to have <code>(1, 1, 0)</code>, representing yellow. For anything
+  in between, we want to <em>linearly interpolate</em> between blue and yellow,
+  so let's start from there and make a linear interpolation function, often
+  called <code>mix()</code> or <code>lerp()</code> in graphics programming.
+</p>
+
+<pre><code class="language-python">def mix(start, end, how_much):
+  return start + how_much * (end - start)</code></pre>
+
+<p>
+  Try to fully understand how this works. If <code>how_much</code> is 0, the
+  result will be <code>start + 0 * (end - start)</code>, which is just
+  <code>start</code>. If it's 1, we'll get
+  <code>start + 1 * (end - start)</code>, which is
+  <code>start + end - start</code>, which simplifies to <code>end</code>. If
+  <code>how_much</code> is 0.5, we get <code>start + 0.5 * (end - start)</code>,
+  which is <code>start + (0.5 * end) - (0.5 * start)</code>, where
+  <code>start</code> and <code>-(0.5 * start)</code> sum up to
+  <code>0.5 * start</code> so we get <code>(0.5 * start) + (0.5 * end)</code>,
+  which is <code>(start + end) / 2</code>. You might remember this as a method
+  to take the middle point between two numbers. See how intuitive linear
+  interpolation is?
+</p>
+<p>
+  As a side note, people don't always use the same parameter names as we did,
+  being <code>start</code>, <code>end</code>, and <code>how_much</code>. One
+  might use <code>a</code>, <code>b</code>, and <code>t</code> for example.
+  The third parameter is sometimes called the mix factor, or the blending
+  factor.
+</p>
+<p>
+  This is all well and good, but how do we turn our X and Y coordinates into a
+  single mix factor from 0 to 1?
+</p>
+<h2>Range Mapping</h2>
+<p>
+  You might realize that we don't really need the Y coordinate, as we want a
+  purely horizontal gradient where changing the Y coordinate has no effect on
+  the values. What we want is to map our X coordinate from the (0, width) range
+  to the (0, 1) range. An easy way to achieve this is to just divide X by the
+  width of our image, which is 200 in our case. This gives us a value from 0 to
+  1 that we can use as the mix factor. In the general case, we might need more
+  arithmetic operations for range mapping. Imagine, for example, that we want to
+  map a number, <code>v</code>, from the [4, 10] range to the [500, 700] range.
+  For this, we need to calculate how much <code>v</code> has moved from 4 to 10.
+  This is the exact opposite of linear interpolation. Instead of finding the
+  interpolated value <code>v</code> given <code>start</code>, <code>end</code>,
+  and <code>how_much</code>, we want to find <code>how_much</code> given
+  <code>v</code>, <code>start</code>, and <code>end</code>. This might sound
+  complicated at first, but as we saw before, if <code>start</code> is 0
+  (as it was in the (0, width) range), it becomes trivial to find
+  <code>how_much</code>, as we just need to divide <code>v</code> by the size of
+  our range. We could simply subtract <code>start</code> from both ends and
+  transform our input range of [4, 10] to [0, 6] while it still has the same
+  size of 6 units.
+</p>
+<p>
+  We're almost done, we just need to subtract the same amount from
+  <code>v</code> so that it stays just as far from <code>start</code> and
+  <code>end</code> as it was before. We can now simply divide <code>v</code>
+  by 6 (the size of our range) to find <code>how_much</code>.
+</p>
+
+<pre><code class="language-python"># returns t (the mix factor)
+def unmix(v, start, end):
+    return (v - start) / (end - start)</code></pre>
+
+<p>
+  After this <em>unmixing</em>, we can now <em>remix</em> in the output range,
+  [500, 700].
+</p>
+
+<pre><code class="language-python">def remap(
+  v,
+  input_start,
+  input_end,
+  output_start,
+  output_end
+):
+    how_much = unmix(v, input_start, input_end)
+    return mix(output_start, output_end, how_much)</code></pre>
+
+<p>
+  If we use the actual math operations instead of calling <code>unmix()</code>
+  and <code>mix()</code>, we get the following.
+</p>
+
+<pre><code class="language-python">def remap(
+  v,
+  input_start,
+  input_end,
+  output_start,
+  output_end
+):
+    t = (v - input_start) / (input_end - input_start)
+    return output_start + t * (output_end - output_start)</code></pre>
+
+<p>
+  This function basically figures out how much <code>v</code> has moved relative
+  to the input range, and moves it by the same amount in the output range.
+</p>
+<h2><code>mix()</code> for RGB?</h2>
+<p>
+  So far, we know how to mix between single numbers, but our original goal was
+  to mix between two RGB triplets, namely, blue and yellow. Conveniently for us,
+  we can just do the same mix operation for all three color channels (RGB)
+  individually and effectively lerp between the two colors.
+</p>
+
+<pre><code class="language-python">def mix_colors(
+  a: Color,
+  b: Color,
+  t: float
+) -> Color:
+    result = new Color(
+      red=mix(a.red, b.red, t),
+      green=mix(a.green, b.green, t),
+      blue=mix(a.blue, b.blue, t)
+    )</code></pre>
+
+<p>
+  We're finally ready to update our <code>calculate_pixel_color()</code>
+  function to give us a blue-to-yellow gradient from left to right.
+</p>
+
+<pre><code class="language-python">def calculate_pixel_color(x: int, y: int) -> Color:
+  blue = new Color(0, 0, 1)
+  yellow = new Color(1, 1, 0)
+  t = x / width
+  return mix_colors(blue, yellow, t)</code></pre>
+
+<p>
+  Keep in mind that, unlike <code>x</code> and <code>y</code> which vary for
+  every pixel, <code>width</code> and <code>height</code> are global constants
+  and have the same value for all pixels. We call these uniform values, or just
+  uniforms, as they don't change throughout the shading process.
+</p>
+
+<p>
+  I've gone ahead and implemented this shader in GLSL, the OpenGL Shading
+  Language. Here's what it looks like.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/blue-yellow-gradient.png" alt="a horizontal blue-to-yellow gradient"
+  title="a horizontal blue-to-yellow gradient" style="height: 14rem; width: auto;" />
+
+<h2>The Center of a Pixel</h2>
+<h2>Some Topic</h2>
+<p>
+  This topic is really cool I want to talk about it all the time.
+</p>

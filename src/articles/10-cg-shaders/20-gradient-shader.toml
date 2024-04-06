@@ -1,0 +1,8 @@
+article_id = "gradient-shader"
+article_title = "The First Shader"
+article_author = "$-blog_author-$"
+article_date = "2024-04-06"
+article_visible = true
+article_contents = "$--load--$(\"20-gradient-shader.html\")"
+
+[vars]
