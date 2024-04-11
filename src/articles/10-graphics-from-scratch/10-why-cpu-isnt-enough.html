@@ -4,6 +4,14 @@
   in real-time, or how your operating system draws its windows?
 </p>
 
+<h2>Before We Start</h2>
+<p>
+  You're gonna see some pseudocode similar to the <code>Python</code>
+  programming language, but you don't need to actually code anything or know
+  how to code. We'll get to actual coding a few articles later, at which point
+  I'll help you get started if you're not a programmer already.
+</p>
+
 <h2>Encoding Video Signals</h2>
 <p>
   You might already know that your computer needs a GPU, graphics processing
@@ -49,8 +57,8 @@ def calculate_pixel_color(x: int, y: int) -> Color:
     ...
 
 
-for y in range(height):
-    for x in range(width):
+for y in range(HEIGHT):
+    for x in range(WIDTH):
         pixels[y][x] = calculate_pixel_color(x, y)</code></pre>
 
 <p>
@@ -91,7 +99,7 @@ for y in range(height):
 </p>
 <img src="$--root_path--$/assets/images/articles/parallel-lamps.svg"
   alt="independent RGB lamps being altered in parallel" title="independent RGB lamps being altered in parallel"
-  style="height: 32rem; width: auto;" />
+  style="width: 37rem;" />
 <p>
   All of this is to say, parallelism matters a lot, and, if we can find a way to
   <em>parallelize</em> our instructions instead of running them on each pixel
@@ -108,9 +116,18 @@ for y in range(height):
   they're not quite fast enough to render realistic scenes at 60 frames per
   second. This led to the creation of shaders on graphics card, which let you
   run the same instruction on all pixels at once. Well, it's a bit more
-  complicated than that and there is still some amount of <em>serial</em> work,
-  but for the sake of simplicity we'll assume all pixels are processed at once.
+  complicated than that, and there is still some amount of <em>serial</em> work,
+  but for the sake of simplicity, you can assume all pixels are processed at
+  once.
 </p>
 <p>
-  In the next article, we'll make a very simple gradient shader from scratch.
+  So, is this all a GPU does? Run shaders and encode video signals? In reality,
+  there are a lot more things your GPU is responsible for which we'll explore
+  in future articles. For now, you can safely assume a GPU just executes
+  parallel instructions on the pixels of an image and encodes it into a video
+  signal.
+</p>
+<p>
+  In the next article, we'll learn how one can make a very simple gradient
+  shader from scratch.
 </p>

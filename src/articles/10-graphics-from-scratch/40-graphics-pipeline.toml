@@ -2,7 +2,7 @@ article_id = "graphics-pipeline"
 article_title = "The Graphics Pipeline"
 article_author = "$-blog_author-$"
 article_date = "2024-04-06"
-article_visible = false
-article_contents = "$--load--$(\"30-graphics-pipeline.html\")"
+article_visible = true
+article_contents = "$--load--$(\"40-graphics-pipeline.html\")"
 
 [vars]

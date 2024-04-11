@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>Triangle From Scratch: Interpolation</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">Triangle From Scratch: Interpolation</h1>
+      <div class="small-detail">bean • Apr 11, 2024</div>
+      <br />
+      <p>
+  In the last few articles, we manually rendered triangles using nothing but
+  math, and we exported the final image to a PNG file. Here's what we had at the
+  end:
+</p>
+
+<img src="../../assets/images/articles/cpu-2-triangles.png"
+  alt="a blue triangle and a pink triangle on top of it" title="a blue triangle and a pink triangle on top of it"
+  style="width: 28rem;" />
+
+<p>
+  This is great, but wouldn't it be cool if we could have different colors for
+  each vertex, and blend between them? Not just color, but anything else, like
+  normal vectors, positions, or texture coordinates! Yes, we're getting closer
+  to texturing, so be excited.
+</p>
+<p>
+  Let's modify our <code>Triangle</code> class to store different colors for
+  every vertex.
+</p>
+
+<pre><code class="language-python">class Triangle:
+    v0: Vec2
+    v1: Vec2
+    v2: Vec2
+    v0_col: Color
+    v1_col: Color
+    v2_col: Color
+
+    def __init__(
+        self,
+        v0: Vec2,
+        v1: Vec2,
+        v2: Vec2,
+        v0_col: Color,
+        v1_col: Color,
+        v2_col: Color
+    ) -> None:
+        self.v0 = v0
+        self.v1 = v1
+        self.v2 = v2
+        self.v0_col = v0_col
+        self.v1_col = v1_col
+        self.v2_col = v2_col
+
+    ...</code></pre>
+
+<p>
+  Let's update the triangle list to account for the changes we just made. We'll
+  also get rid of the second triangle to keep things simple for now.
+</p>
+
+<pre><code class="language-python"># triangle list
+tris: list[Triangle] = []
+tris.append(Triangle(
+    v0=Vec2(256, 48),
+    v1=Vec2(160, 192),
+    v2=Vec2(64, 48),
+    v0_col=Color(1, .2, .1),
+    v1_col=Color(.2, 1, .1),
+    v2_col=Color(.1, .2, 1)
+))</code></pre>
+
+<p>
+  Now, we need to update the render code to somehow interpolate the color. We'll
+  also remove some redundant comments.
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        p = Vec2(x + .5, y + .5)
+
+        col = Color(.1, .1, .1)
+        for tri in tris:
+            bary: Vec3 = tri.cart_to_bary(p)
+            if bary_is_outside(bary):
+                continue
+
+            # TODO: interpolate the color
+
+        idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
+        buf[idx] = col</code></pre>
+
+<h2>It's Barycentric, Again</h2>
+<p>
+  It turns out we have everything we need for interpolating values between the
+  vertices of a triangle. If <code>b0</code>, <code>b1</code>, and
+  <code>b2</code> are our Barycentric coordinates, and <code>a</code>,
+  <code>b</code>, and <code>c</code> are the data on the vertices, we can blend
+  between them by scaling each data value by its corresponding Barycentric
+  coordinate, and adding them up:
+</p>
+
+<pre><code>interpolated = (b0 * a) + (b1 * b) + (b2 * c)</code></pre>
+
+<p>
+  This makes sense, because if <code>b0</code> is 1, then we know that
+  <code>p</code> is exactly on <code>v0</code>. If <code>b1</code> is 1, then
+  <code>p</code> is on <code>v1</code>, and so on. If <code>p</code> is at the
+  center of the triangle, the three smaller triangles we get by drawing line
+  segments from each vertex to <code>p</code>, occupy the same proportion of
+  area in relation to the larger triangle, and since they add up to 1, we get
+  (1/3, 1/3, 1/3) as our Barycentric coordinates, meaning the three data values
+  will be averaged out.
+</p>
+
+<p>
+  It's important to keep in mind that <code>a</code>, <code>b</code>, and
+  <code>c</code> can be either scalars or vectors of any dimension, but
+  <code>b0</code>, <code>b1</code>, and <code>b2</code> are always scalars.
+  Though, when combined, they make a 3D vector, but I digress. What this means
+  is that we can blend colors, positions, single scalar numbers, or anything we
+  want. In this case, we want to blend colors.
+</p>
+
+<p>
+  Back in the render code, we'll update the loop that goes through the triangle
+  list.
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        ...
+
+        for tri in tris:
+            bary: Vec3 = tri.cart_to_bary(p)
+            if bary_is_outside(bary):
+                continue
+
+            col = (Vec3.scalar(bary.x) * tri.v0_col) \
+                + (Vec3.scalar(bary.y) * tri.v1_col) \
+                + (Vec3.scalar(bary.z) * tri.v2_col)
+
+        ...</code></pre>
+
+<h2>RGB Triplets Are Vectors in Disguise</h2>
+
+<p>
+  Did you see it? There's a huge problem with the code above. We're trying to
+  multiply a <code>Vec3</code> by a <code>Color</code>, which is an entirely
+  separate class. We've talked about how we can treat RGB triplets as 3D
+  vectors, and how it's easier to not have separate classes for structures that
+  can be represented as vectors. Let's get rid of the <code>Color</code> class
+  entirely, and use <code>Vec3</code> instead. You can use the "find and
+  replace" feature of your code editor to replace any occurance of
+  <code>Color</code> with <code>Vec3</code>. Make sure it's case sensitive. If
+  you're using VS Code, you need to enable the "Match Case" option. We're almost
+  there. In the loop where we fill the RGB8 buffer, we need to use
+  <code>col.x/y/z</code> instead of <code>col.r/g/b</code>.
+</p>
+
+<pre><code class="language-python"># RGB8 buffer
+buf_rgb8: list[tuple[int, int, int]] = []
+for i in range(N_PIXELS):
+    col: Vec3 = buf[i]
+    buf_rgb8.append((
+        int(col.x * 255),
+        int(col.y * 255),
+        int(col.z * 255)
+    ))</code></pre>
+
+<p>
+  And, we're done! If we rerun the script, this is what we'll get:
+</p>
+
+<img src="../../assets/images/articles/cpu-triangle-interpolated.png"
+  alt="a colorful triangle with different colors on each vertex"
+  title="a colorful triangle with different colors on each vertex" style="width: 28rem;" />
+
+<p>
+  In the next article, we'll render a texture onto a
+  <abbr data-tooltip="quadrilateral, a four-sided polygon">quad</abbr> made up
+  of two triangles.
+</p>
+      <div class="article-nav-container"><a class="prev-article-link" href="triangle-multiple.html" title="Previous article: Triangle From Scratch: More Triangles">← Triangle From Scratch: More Triangles</a>
+<a class="next-article-link" href="triangle-textured-quad.html" title="Next article: Triangle From Scratch: Textures">Triangle From Scratch: Textures →</a>
+</div>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>

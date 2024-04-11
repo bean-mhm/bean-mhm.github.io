@@ -1,0 +1,225 @@
+<p>
+  As we saw in
+  <a href="$--prev_article_path--$" title="$--prev_article_title--$">the previous article</a>,
+  we need to use Barycentric coordinates if we want to know whether a point is
+  inside a certain triangle. Barycentric coordinates consist of three numbers
+  representing how close a given point is to the 3 vertices of a triangle, and
+  whether the point is inside the triangle.
+</p>
+
+<h2>Relative to a Specific Triangle</h2>
+<p>
+  Unlike the Caretsian coordinate system, which is what we've been using so far,
+  Barycentric coordinate systems are specific to a triangle. When we talk about
+  Barycentric coordinates, we need to mention what triangle they belong to.
+  There is no global Barycentric coordinate system, and every triangle has its
+  own Barycentric coordinate system.
+</p>
+<p>
+  Here's a random triangle with its vertices labeled <code>v0</code>,
+  <code>v1</code>, and <code>v2</code>.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/triangle-verts.png"
+  alt="a triangle with its vertices labeled v0, v1, and v2" title="a triangle with its vertices labeled v0, v1, and v2"
+  style="width: 30rem;" />
+
+<p>
+  If we place a point <code>p</code> exactly on <code>v0</code>, the Barycentric
+  coordinates of that point relative to this triangle would be (1, 0, 0). If we
+  move it to <code>v1</code>, we get (0, 1, 0), and if we move it to
+  <code>v2</code>, we get (0, 0, 1). For anywhere else, the values get linearly
+  interpolated.
+</p>
+
+<h2>The Formula</h2>
+<p>
+  To compute the Barycentric coordinates of a point <code>p</code> relative to a
+  triangle with vertices <code>v0</code>, <code>v1</code>, and <code>v2</code>,
+  we first draw line segments from the 3 vertices to <code>p</code>. This
+  creates three new triangles, namely, <code>v0-p-v1</code>,
+</p>
+
+<img src="$--root_path--$/assets/images/articles/triangle-v0pv1.png"
+  alt="a triangle and a point inside it with an inner triangle v0-p-v1"
+  title="a triangle and a point inside it with an inner triangle v0-p-v1" style="width: 30rem;" />
+
+<p>
+  <code>v0-p-v2</code>,
+</p>
+
+<img src="$--root_path--$/assets/images/articles/triangle-v0pv2.png"
+  alt="a triangle and a point inside it with an inner triangle v0-p-v2"
+  title="a triangle and a point inside it with an inner triangle v0-p-v2" style="width: 30rem;" />
+
+<p>
+  and <code>v1-p-v2</code>.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/triangle-v1pv2.png"
+  alt="a triangle and a point inside it with an inner triangle v1-p-v2"
+  title="a triangle and a point inside it with an inner triangle v1-p-v2" style="width: 30rem;" />
+
+<p>
+  We'll name the Barycentric coordinates <code>b0</code>, <code>b1</code>, and
+  <code>b2</code>. To compute <code>b0</code>, we calculate the area of the
+  <code>v1-p-v2</code> triangle, shaded blue, and divide it by the area of the
+  big triangle. Note how this triangle is in front of <code>v0</code>, and that
+  we use the other two vertices instead of <code>v0</code>. When <code>p</code>
+  is exactly on <code>v0</code>, the <code>v1-p-v2</code> triangle fills up all
+  of the larger triangle, while the other smaller triangles collapse to nothing,
+  which explains why we get (1, 0, 0) as our Barycentric coordinates. Similarly,
+  <code>b1</code> is equal to the area of <code>v0-p-v2</code>, shaded orange,
+  divided by the total area. You should be able to guess what <code>b2</code>
+  is equal to at this point.
+</p>
+
+<p>
+  So, all we really need to do is to calculate some triangle areas. Neat!
+  Or...?!
+</p>
+
+<h2>Triangle Area</h2>
+<p>
+  There are multiple formulas for the area of a triangle, but the one we'll use
+  is equal to one half times the length of a side, times the length of another
+  side, times the sine of the angle between the two sides. This might sound
+  complicated to implement, but thanks to mathematicians, there is a really
+  simple formula that does 90% of what we need without using (co)sine functions
+  or square roots! This function takes two 2D vectors as its input and returns
+  the product of their lengths and the sine of the angle between them. It
+  just lacks the final multiplication by (1/2), which is why I said it does 90%
+  of what we need. We'll skip over the details of this function and how it's
+  derived.
+</p>
+
+<p>
+  Insert the following piece of code before the code section. To recap, we have
+  constants first, then classes, then functions, and finally the code section.
+</p>
+
+<pre><code class="language-python"># |a| * |b| * sin(theta)
+def cross_2d(a: Vec2, b: Vec2) -> float:
+    return (a.x * b.y) - (a.y * b.x)</code></pre>
+
+<p>
+  This function has another property: it tells us whether the vertices are
+  ordered clockwise or counterclockwise, such that we'll get a negative output
+  if they're ordered clockwise. This actually plays a major role in detecting
+  whether <code>p</code> is inside the triangle, but it means we need to go back
+  to the code section and reorder our vertices so that they're in a
+  counterclockwise order.
+</p>
+
+<pre><code class="language-python"># triangle vertices
+v0 = Vec2(256, 48)
+v1 = Vec2(160, 192)
+v2 = Vec2(64, 48)</code></pre>
+
+<h2>Quick Detour</h2>
+<p>
+  We're almost there, but first, we need a <code>Vec3</code> class to represent
+  Barycentric coordinates. Of course, we'll use it for other things later.
+</p>
+
+<pre><code class="language-python">class Vec3:
+    x: float
+    y: float
+    z: float
+
+    def __init__(self, x: float, y: float, z: float) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+
+    @staticmethod
+    def scalar(s: float):
+        return Vec3(s, s, s)
+
+    def __add__(self, other):
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __iadd__(self, other):
+        self.x += other.x
+        self.y += other.y
+        self.z += other.z
+
+    def __sub__(self, other):
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __isub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+        self.z -= other.z
+
+    def __mul__(self, other):
+        return Vec3(self.x * other.x, self.y * other.y, self.z * other.z)
+
+    def __imul__(self, other):
+        self.x *= other.x
+        self.y *= other.y
+        self.z *= other.z
+
+    def __truediv__(self, other):
+        return Vec3(self.x / other.x, self.y / other.y, self.z / other.z)
+
+    def __idiv__(self, other):
+        self.x /= other.x
+        self.y /= other.y
+        self.z /= other.z
+
+    def __neg__(self):
+        return Vec3(-self.x, -self.y, -self.z)</code></pre>
+
+<h2>Caretsian to Barycentric</h2>
+<p>
+  Let's now create a function that computes the Barycentric coordinates of a
+  point <code>p</code> with respect to a triangle with vertices <code>v0</code>,
+  <code>v1</code>, and <code>v2</code>. Add this piece of code below
+  the <code>cross_2d()</code> function.
+</p>
+
+<pre><code class="language-python"># triangle vertices must be ordered counterclockwise
+def cart_to_bary(
+    p: Vec2,
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2
+) -> Vec3:
+    b = Vec3(
+        cross_2d(v1 - p, v2 - p),
+        cross_2d(v2 - p, v0 - p),
+        cross_2d(v0 - p, v1 - p)
+    )
+    b /= Vec3.scalar(cross_2d(v1 - v0, v2 - v0))
+    return b</code></pre>
+
+<p>
+  We're not using the (1/2) factor, since it gets canceled out because it also
+  applies to the denominator which is the total area.
+</p>
+
+<p>
+  An interesting property of Barycentric coordinates is that they always add up
+  to up, and this makes sense, because the smaller triangles perfectly divide
+  the larger triangle into three pieces.
+</p>
+
+<p>
+  The last step is to figure out whether <code>p</code> is inside the triangle.
+  Remember the three smaller triangles we made by drawing line segments from
+  every vertex to <code>p</code>? Well, one or more of those triangles turn out
+  to be ordered clockwise when <code>p</code> is outside the triangle, which
+  means we get negative values in our Barycentric coordinates, and that's how we
+  decide if <code>p</code> is inside or outside the triangle!
+</p>
+
+<pre><code class="language-python">def bary_is_outside(b: Vec3) -> bool:
+    return min(b.x, b.y, b.z) < 0</code></pre>
+
+<h2>The Rendering</h2>
+<p>
+  We are now ready to determine which pixels fall inside the triangle, and color
+  them differently than the ones that don't. We'll do this and more in the next
+  article.
+</p>

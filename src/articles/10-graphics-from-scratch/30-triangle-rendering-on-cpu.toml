@@ -1,0 +1,8 @@
+article_id = "triangle-rendering-on-cpu"
+article_title = "Triangle From Scratch: Manual Mode"
+article_author = "$-blog_author-$"
+article_date = "2024-04-10"
+article_visible = true
+article_contents = "$--load--$(\"30-triangle-rendering-on-cpu.html\")"
+
+[vars]

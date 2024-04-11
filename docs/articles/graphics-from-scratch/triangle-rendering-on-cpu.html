@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>Triangle From Scratch: Manual Mode</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">Triangle From Scratch: Manual Mode</h1>
+      <div class="small-detail">bean • Apr 10, 2024</div>
+      <br />
+      <p>
+  If you've ever worked with 3D modeling software before, you should know that,
+  at the most fundumental level, 3D models are made up of triangles. It's common
+  knowledge in graphics that GPUs are optimized for rendering triangles, and
+  it makes sense too. A triangle is the simplest type of polygons there is, it
+  just has 3 vertices, and that's it. What about shaders, though? Shaders come
+  after triangles. The GPU first determines which pixels fall inside the
+  triangle, and runs the shader only for those pixels. We'll explore this
+  further a few articles later.
+</p>
+<p>
+  Get ready for a fun ride, because we'll manually render a triangle onto an
+  image in Python without ever using a graphics library or a GPU!
+</p>
+
+<h2>Python?</h2>
+<p>
+  There's little chance you'd be unheard of
+  <a href="https://www.python.org/" target="_blank">Python</a>. Python is a very
+  popular programming language, mostly due to its simplicity and being easy to
+  learn, and that's why we'll be using Python for this tiny project.
+</p>
+<p>
+  If you're new to programming, I recommend
+  <a href="https://www.w3schools.com/python/" target="_blank">W3Schools's Python tutoiral series</a>.
+  Once ready,
+  <a href="https://www.python.org/downloads/" target="_blank">download and install Python</a>
+  and an <abbr data-tooltip="Integrated Development Environment">IDE</abbr> or
+  a regular text editor. I, however, humbly suggest you start with
+  <a href="https://code.visualstudio.com/" target="_blank">Visual Studio Code</a>,
+  and install the Python extension from the extensions menu.
+</p>
+
+<h2>The Image</h2>
+<p>
+  Open your favorite IDE and create an empty Python script file named
+  <code>cpu-triangle.py</code> or anything you like. We'll start by defining
+  some constants for the width and height of our image and the total number of
+  pixels which is the product of the width and height.
+</p>
+
+<pre><code class="language-python">WIDTH: int = 320
+HEIGHT: int = 240
+N_PIXELS: int = WIDTH * HEIGHT</code></pre>
+
+<p>
+  Then, we'll create a <code>Color</code> class that holds red, green, and blue
+  intensity values. We'll put this class at the bottom, below the constants.
+</p>
+
+<pre><code class="language-python">class Color:
+    r: float
+    g: float
+    b: float
+
+    def __init__(self, r: float, g: float, b: float) -> None:
+        self.r = r
+        self.g = g
+        self.b = b</code></pre>
+
+<p>
+  Now, we need a way to represent our image, so we'll create an array of RGB
+  colors named <code>buf</code>, short for buffer. Note that we won't be using
+  libraries like NumPy for multi-dimensional arrays, parallel computations,
+  cleaner code, or anything else it provides. This will result in inefficient
+  code that's slower to run, but it'll serve our purpose of learning with more
+  insight.
+</p>
+
+<p>
+  Put the following code at the bottom.
+</p>
+
+<pre><code class="language-python"># create buffer and initialize all colors to black
+buf: list[Color] = []
+for i in range(N_PIXELS):
+    buf.append(Color(0, 0, 0))</code></pre>
+
+<h2>Vectors</h2>
+
+<p>
+  To render a triangle, we need to know its three vertices, which can be
+  represented as 2D position vectors, so we'll create a class for 2D vectors,
+  called <code>Vec2</code>. In graphics programming, vectors are used to
+  represent positions in space, normal vectors (perpendicular to a surface),
+  velocity vectors, or even RGB triplets (with <code>Vec3</code>), and many more
+  things. Some programmers like to have separate classes for each of them, even
+  though they have very similar implementations. This separation of classes is
+  helpful to avoid bugs, and it's not necessary.
+</p>
+
+<p>
+  We'll add the following code right after the <code>Color</code> class. You
+  might've realized we have three sections in our code: constants, classes, and
+  the actual code, which we'll call "the code section" from now on.
+</p>
+
+<pre><code class="language-python">class Vec2:
+    x: float
+    y: float
+
+    def __init__(self, x: float, y: float) -> None:
+        self.x = x
+        self.y = y</code></pre>
+
+<p>
+  It's useful to be able to construct a vector with uniform scalar values, so
+  we'll add a static method that takes a single number as its input and returns
+  a <code>Vec2</code> with that number as its X and Y components.
+</p>
+
+<pre><code class="language-python">class Vec2:
+    ...
+
+    @staticmethod
+    def scalar(s: float):
+        return Vec2(s, s)</code></pre>
+
+<p>
+  Every vector class needs basic arithmetic operations: addition, subtraction,
+  multiplication, and division. Let's add those to our vector class using
+  <a href="https://www.geeksforgeeks.org/operator-overloading-in-python/" target="_blank">
+    Python's operator overloading
+  </a> feature.
+</p>
+
+<pre><code class="language-python">class Vec2:
+    ...
+
+    def __add__(self, other):
+        return Vec2(self.x + other.x, self.y + other.y)
+
+    def __iadd__(self, other):
+        self.x += other.x
+        self.y += other.y
+
+    def __sub__(self, other):
+        return Vec2(self.x - other.x, self.y - other.y)
+
+    def __isub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+
+    def __mul__(self, other):
+        return Vec2(self.x * other.x, self.y * other.y)
+
+    def __imul__(self, other):
+        self.x *= other.x
+        self.y *= other.y
+
+    def __truediv__(self, other):
+        return Vec2(self.x / other.x, self.y / other.y)
+
+    def __idiv__(self, other):
+        self.x /= other.x
+        self.y /= other.y</code></pre>
+
+<p>
+  A negation operator flips the signs of the components, so we could have
+  expressions like <code>-velocity</code> where <code>velocity</code> is a
+  <code>Vec2</code>.
+</p>
+
+<pre><code class="language-python">class Vec2:
+    ...
+
+    def __neg__(self):
+        return Vec2(-self.x, -self.y)</code></pre>
+
+<p>
+  We'll add a lot more functions for vectors in the future, but we'll stop here
+  for now.
+</p>
+
+<h2>The Triangle</h2>
+<p>
+  Back in the code section, after creating the buffer, we'll define the three
+  vertices of our triangle, named <code>v0</code>, <code>v1</code>, and
+  <code>v2</code>.
+</p>
+
+<pre><code class="language-python"># create buffer and initialize all colors to black
+...
+
+# triangle vertices
+v0 = Vec2(64, 48)
+v1 = Vec2(160, 192)
+v2 = Vec2(256, 48)</code></pre>
+
+<h2>The Rendering</h2>
+<p>
+  What we need to do now is to iterate through our pixels and see which ones are
+  inside the triangle. This can be easily done with the help of Barycentric
+  coordinates. If this is new to you, don't be scared! It's just three numbers
+  representing how close a given point is to the 3 vertices of a triangle, and
+  whether it is inside the triangle. In our case, that point is the center of
+  the pixel. We'll discuss this further in the next article.
+</p>
+      <div class="article-nav-container"><a class="prev-article-link" href="pixel-center.html" title="Previous article: The Center of a Pixel">← The Center of a Pixel</a>
+<a class="next-article-link" href="triangle-barycentric-coordinates.html" title="Next article: Triangle From Scratch: Inside or Outside?">Triangle From Scratch: Inside or Outside? →</a>
+</div>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>

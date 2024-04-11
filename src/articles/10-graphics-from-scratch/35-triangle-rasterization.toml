@@ -1,0 +1,8 @@
+article_id = "triangle-rasterization"
+article_title = "Triangle From Scratch: Rasterization"
+article_author = "$-blog_author-$"
+article_date = "2024-04-11"
+article_visible = true
+article_contents = "$--load--$(\"35-triangle-rasterization.html\")"
+
+[vars]

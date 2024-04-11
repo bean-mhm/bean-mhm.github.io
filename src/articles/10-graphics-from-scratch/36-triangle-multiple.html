@@ -1,0 +1,114 @@
+<p>
+  In
+  <a href="$--prev_article_path--$" title="$--prev_article_title--$">the previous article</a>,
+  we manually rendered a triangle using nothing but math, and we exported it to
+  a PNG file. Here's what we had at the end:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-triangle.png" alt="a triangle" title="a triangle"
+  style="width: 28rem;" />
+
+<p>
+  Now, one triangle is cool, but two triangles are twice as cool. In this
+  article, we're gonna make some small changes to the code so that it can render
+  several triangles.
+</p>
+<p>
+  Let's start by creating a <code>Triangle</code> class at the end of the
+  classes section.
+</p>
+
+<pre><code class="language-python">class Triangle:
+    v0: Vec2
+    v1: Vec2
+    v2: Vec2
+    col: Color
+
+    def __init__(self, v0: Vec2, v1: Vec2, v2: Vec2, col: Color) -> None:
+        self.v0 = v0
+        self.v1 = v1
+        self.v2 = v2
+        self.col = col</code></pre>
+
+<p>
+  While we're at it, why not add a Barycentric conversion function?
+</p>
+
+<pre><code class="language-python">class Triangle:
+    ...
+
+    def cart_to_bary(self, p: Vec2) -> Vec3:
+        return cart_to_bary(p, self.v0, self.v1, self.v2)</code></pre>
+
+<p>
+  In the code section, we'll remove the block of code that defines the
+  triangle vertices, and we'll make an array of <code>Triangle</code> objects
+  instead.
+</p>
+
+<pre><code class="language-python"># create buffer and initialize all colors to black
+...
+
+# triangle list
+tris: list[Triangle] = []
+tris.append(Triangle(
+    v0=Vec2(256, 48),
+    v1=Vec2(160, 192),
+    v2=Vec2(64, 48),
+    col=Color(.26, .62, .88)
+))
+tris.append(Triangle(
+    v0=Vec2(284, 150),
+    v1=Vec2(264, 224),
+    v2=Vec2(176, 103),
+    col=Color(1, .44, .74)
+))
+
+...</code></pre>
+
+<p>
+  We'll now update the nested loops to account for all triangles.
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        # pixel center point
+        p = Vec2(x + .5, y + .5)
+
+        # begin with the background color
+        col = Color(.1, .1, .1)
+
+        # iterate through the triangles
+        for tri in tris:
+            # get the Barycentric coordinates
+            bary: Vec3 = tri.cart_to_bary(p)
+
+            # check if p falls inside the triangle
+            is_inside: bool = not bary_is_outside(bary)
+
+            # if it does, change the final color
+            if is_inside:
+                col = tri.col
+
+        # update the buffer
+        idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
+        buf[idx] = col</code></pre>
+
+<p>
+  Let's rerun the script and observe the output.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-2-triangles.png"
+  alt="a blue triangle and a pink triangle on top of it" title="a blue triangle and a pink triangle on top of it"
+  style="width: 28rem;" />
+
+<p>
+  Notice how the pink triangle is rendered on top of the blue one. This is
+  because it comes last in the triangle list, so it's rendered after the blue
+  triangle, which explains why it's occluding it.
+</p>
+
+<p>
+  In the next article, we'll color our vertices differently and blend between
+  them.
+</p>

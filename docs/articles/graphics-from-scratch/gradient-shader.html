@@ -1,11 +1,47 @@
-<p>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>The First Shader</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">The First Shader</h1>
+      <div class="small-detail">bean • Apr 6, 2024</div>
+      <br />
+      <p>
   Remember the <code>calculate_pixel_color()</code> function from
-  <a href="$--prev_article_path--$" title="$--prev_article_title--$">the previous article</a>?
+  <a href="why-cpu-isnt-enough.html" title="Why a CPU Is Not Enough">the previous article</a>?
   Let's modify it so that it produces a blue-to-yellow gradient from left to
   right. Can you figure out how we can do this while only knowing the X and Y
   coordinates (and the width and height of the image)? Try to think about it for
   a bit, and come back when you're ready.
 </p>
+
+<h2>Before We Start</h2>
+<p>
+  You're gonna see some pseudocode similar to the <code>Python</code>
+  programming language, but you don't need to actually code anything or know
+  how to code. We'll get to actual coding a few articles later, at which point
+  I'll help you get started if you're not a programmer already.
+</p>
+
 <h2>Linear Interpolation</h2>
 <p>
   Ok, here's the spoiler. What we want is for the left-most pixels to have RGB
@@ -16,8 +52,12 @@
   called <code>mix()</code> or <code>lerp()</code> in graphics programming.
 </p>
 
-<pre><code class="language-python">def mix(start, end, how_much):
-  return start + how_much * (end - start)</code></pre>
+<pre><code class="language-python">def mix(
+    start: float,
+    end: float,
+    how_much: float
+) -> float:
+    return start + how_much * (end - start)</code></pre>
 
 <p>
   Try to fully understand how this works. If <code>how_much</code> is 0, the
@@ -74,7 +114,11 @@
 </p>
 
 <pre><code class="language-python"># returns t (the mix factor)
-def unmix(v, start, end):
+def unmix(
+    v: float,
+    start: float,
+    end: float
+) -> float:
     return (v - start) / (end - start)</code></pre>
 
 <p>
@@ -83,13 +127,13 @@ def unmix(v, start, end):
 </p>
 
 <pre><code class="language-python">def remap(
-  v,
-  input_start,
-  input_end,
-  output_start,
-  output_end
-):
-    how_much = unmix(v, input_start, input_end)
+  v: float,
+  input_start: float,
+  input_end: float,
+  output_start: float,
+  output_end: float
+) -> float:
+    how_much: float = unmix(v, input_start, input_end)
     return mix(output_start, output_end, how_much)</code></pre>
 
 <p>
@@ -98,13 +142,13 @@ def unmix(v, start, end):
 </p>
 
 <pre><code class="language-python">def remap(
-  v,
-  input_start,
-  input_end,
-  output_start,
-  output_end
-):
-    t = (v - input_start) / (input_end - input_start)
+  v: float,
+  input_start: float,
+  input_end: float,
+  output_start: float,
+  output_end: float
+) -> float:
+    t: float = (v - input_start) / (input_end - input_start)
     return output_start + t * (output_end - output_start)</code></pre>
 
 <p>
@@ -120,14 +164,14 @@ def unmix(v, start, end):
 </p>
 
 <pre><code class="language-python">def mix_colors(
-  a: Color,
-  b: Color,
-  t: float
+    a: Color,
+    b: Color,
+    t: float
 ) -> Color:
-    result = new Color(
-      red=mix(a.red, b.red, t),
-      green=mix(a.green, b.green, t),
-      blue=mix(a.blue, b.blue, t)
+    return Color(
+        red=mix(a.red, b.red, t),
+        green=mix(a.green, b.green, t),
+        blue=mix(a.blue, b.blue, t)
     )</code></pre>
 
 <p>
@@ -136,10 +180,10 @@ def unmix(v, start, end):
 </p>
 
 <pre><code class="language-python">def calculate_pixel_color(x: int, y: int) -> Color:
-  blue = new Color(0, 0, 1)
-  yellow = new Color(1, 1, 0)
-  t = x / width
-  return mix_colors(blue, yellow, t)</code></pre>
+    blue = Color(0, 0, 1)
+    yellow = Color(1, 1, 0)
+    t: float = x / width
+    return mix_colors(blue, yellow, t)</code></pre>
 
 <p>
   Keep in mind that, unlike <code>x</code> and <code>y</code> which vary for
@@ -153,11 +197,34 @@ def unmix(v, start, end):
   Language. Here's what it looks like.
 </p>
 
-<img src="$--root_path--$/assets/images/articles/blue-yellow-gradient.png" alt="a horizontal blue-to-yellow gradient"
-  title="a horizontal blue-to-yellow gradient" style="height: 14rem; width: auto;" />
+<img src="../../assets/images/articles/blue-yellow-gradient.png" alt="a horizontal blue-to-yellow gradient"
+  title="a horizontal blue-to-yellow gradient" style="width: 25rem;" />
 
-<h2>The Center of a Pixel</h2>
-<h2>Some Topic</h2>
 <p>
-  This topic is really cool I want to talk about it all the time.
+  Check out
+  <a href="https://www.shadertoy.com/view/4cVGRD" target="_blank">this shader on Shadertoy</a>,
+  a website for sharing your shaders with the world. I encourage you to play
+  with the code and see what interesting things you can achieve.
 </p>
+      <div class="article-nav-container"><a class="prev-article-link" href="why-cpu-isnt-enough.html" title="Previous article: Why a CPU Is Not Enough">← Why a CPU Is Not Enough</a>
+<a class="next-article-link" href="pixel-center.html" title="Next article: The Center of a Pixel">The Center of a Pixel →</a>
+</div>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>

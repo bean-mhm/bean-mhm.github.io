@@ -1,8 +1,8 @@
 article_id = "why-cpu-isnt-enough"
-article_title = "Why a CPU is Not Enough"
+article_title = "Why a CPU Is Not Enough"
 article_author = "$-blog_author-$"
 article_date = "2024-04-06"
-article_visible = false
+article_visible = true
 article_contents = "$--load--$(\"10-why-cpu-isnt-enough.html\")"
 
 [vars]

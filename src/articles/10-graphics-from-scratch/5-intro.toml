@@ -1,0 +1,8 @@
+article_id = "intro"
+article_title = "Intro"
+article_author = "$-blog_author-$"
+article_date = "2024-04-06"
+article_visible = true
+article_contents = "$--load--$(\"5-intro.html\")"
+
+[vars]

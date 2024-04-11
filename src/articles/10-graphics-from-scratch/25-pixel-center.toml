@@ -1,0 +1,8 @@
+article_id = "pixel-center"
+article_title = "The Center of a Pixel"
+article_author = "$-blog_author-$"
+article_date = "2024-04-07"
+article_visible = true
+article_contents = "$--load--$(\"25-pixel-center.html\")"
+
+[vars]

@@ -1,0 +1,8 @@
+article_id = "triangle-multiple"
+article_title = "Triangle From Scratch: More Triangles"
+article_author = "$-blog_author-$"
+article_date = "2024-04-11"
+article_visible = true
+article_contents = "$--load--$(\"36-triangle-multiple.html\")"
+
+[vars]

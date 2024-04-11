@@ -186,6 +186,10 @@ code {
   line-height: 1.2;
 }
 
+p+img {
+  margin-bottom: var(--pico-typography-spacing-vertical);
+}
+
 .article-nav-container {
   display: flex;
   flex-flow: row nowrap;

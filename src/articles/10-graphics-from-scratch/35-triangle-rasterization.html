@@ -1,0 +1,373 @@
+<p>
+  In
+  <a href="$--prev_article_path--$" title="$--prev_article_title--$">the previous article</a>,
+  we saw how we can determine if a point is inside a triangle, and we're now
+  ready to render our triangle. The process of selecting pixels that fall inside
+  a triangle is what we call rasterization, which is what every game and
+  graphics program uses to render images. Said pixels are sometimes called
+  fragments, and you'll see these terms being used interchangeably.
+</p>
+
+<p>
+  We'll add this nested loop at the bottom of the code section:
+</p>
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        # pixel center point
+        p = Vec2(...)
+
+        # see if p falls inside the triangle
+        bary: Vec3 = cart_to_bary(p, v0, v1, v2)
+        is_inside: bool = not bary_is_outside(bary)
+
+        # pick colors for the background and the triangle
+        COL_BG = Color(.1, .1, .1)
+        COL_TRI = Color(.26, .62, .88)
+
+        # determine the final color
+        col: Color = COL_TRI if is_inside else COL_BG
+
+        # update the buffer
+        idx = ...
+        buf[idx] = col</code></pre>
+
+<h2>Pixel Center</h2>
+<p>
+  Next, we need to fill the omitted parts in the code (<code>...</code>).
+  Starting from the top, we need to calculate the current pixel's center
+  coordinates. As discussed previously, the center coordinates are offset by 0.5
+  units from the integer coordinates of the pixel:
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        # pixel center point
+        p = Vec2(x + .5, y + .5)
+    
+    ...  </code></pre>
+
+
+<h2>Indices and Ordering</h2>
+<p>
+  Now, <code>buf</code> is a one-dimensional array, but we're working with a 2D
+  grid of pixels, so how do we convert our integer X and Y coordinates to a 1D
+  coordinate?
+  We <em>could</em> have used a 2D array from the start, but learning how things
+  are laid out in memory (RAM or VRAM) helps us better understand the decisions
+  we make. After all, memory addresses are 1D indices. Consider the following
+  5x3 grid.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/5x3grid.png" alt="a 5 by 3 grid" title="a 5 by 3 grid"
+  style="width: 32rem;" />
+
+<p>
+  How would you personally order the cells in a 1D sequence? Would you do it
+  like this?
+</p>
+
+<img src="$--root_path--$/assets/images/articles/5x3grid-order1.png"
+  alt="a 5 by 3 grid with a path showing the order of the cells"
+  title="a 5 by 3 grid with a path showing the order of the cells" style="width: 32rem;" />
+
+<p>
+  Or, this?
+</p>
+
+<img src="$--root_path--$/assets/images/articles/5x3grid-order2.png"
+  alt="a 5 by 3 grid with a path showing the order of the cells"
+  title="a 5 by 3 grid with a path showing the order of the cells" style="width: 32rem;" />
+
+<p>
+  Yeah, I don't think so. We need to pick an order we can easily derive a
+  formula for. A formula that can turn our X and Y to a 1D index, and vice
+  versa. Here's one such ordering:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/5x3grid-order3.png"
+  alt="a 5 by 3 grid with a path showing the order of the cells"
+  title="a 5 by 3 grid with a path showing the order of the cells" style="width: 32rem;" />
+
+<p>
+  Let's make a table for X and Y and the index to find the relation between
+  them. Keep in mind the width and height which are 5 and 3 respectively.
+</p>
+
+<div class="overflow-auto">
+  <table class="striped" style="display: inline-block;">
+    <thead>
+      <tr>
+        <th scope="col">Index</th>
+        <th scope="col">X</th>
+        <th scope="col">Y</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">0</th>
+        <td>0</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th scope="row">1</th>
+        <td>1</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th scope="row">2</th>
+        <td>2</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th scope="row">3</th>
+        <td>3</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th scope="row">4</th>
+        <td>4</td>
+        <td>0</td>
+      </tr>
+
+      <tr>
+        <th scope="row">5</th>
+        <td>0</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th scope="row">6</th>
+        <td>1</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th scope="row">7</th>
+        <td>2</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th scope="row">8</th>
+        <td>3</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th scope="row">9</th>
+        <td>4</td>
+        <td>1</td>
+      </tr>
+
+      <tr>
+        <th scope="row">10</th>
+        <td>0</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">11</th>
+        <td>1</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">12</th>
+        <td>2</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">13</th>
+        <td>3</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">14</th>
+        <td>4</td>
+        <td>2</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+  Take a look at X as the index goes up: 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, ...
+</p>
+<p>
+  It's a repeating pattern. It looks a lot like taking the remainder in an
+  integer division. In fact, it <em>is</em> the remainder of an integer
+  division: it's <code>index % 5</code>. More generally, it's
+  <code>index % WIDTH</code>. So, now you know how to calculate X based on the
+  1D index and the width of the image.
+</p>
+<p>
+  Let's do the same with Y. The values from top to bottom are five 0s, five 1s,
+  and five 2s. It seems like Y is being divided by some other integer, because
+  it's increasing in a slow rate in a linear fashion. Turns out, Y is equal to
+  <code>index // 5</code>, which, in general, is <code>index // WIDTH</code>.
+  The <code>//</code> symbol is for integer division where the result is
+  floored.
+</p>
+<p>
+  We now know how to convert a 1D index to X and Y integer coordinates, but how
+  do we do the inverse? How do we go from X and Y to the 1D index? One thing you
+  can notice is that every time X goes up by 1, or resets back to 0 after
+  reaching <code>WIDTH</code>, the index also goes up by one. Another thing is
+  that the indices of the cells in the first row range from 0 to 4, while the
+  second row has indices from 5 to 9, and the third row goes from 10 to 14,
+  which is a total of 15 indices, because we have 15 cells. The index is almost
+  equal to X, except it increases by 5, or <code>WIDTH</code>, every time we go
+  to the next row. The index is equal to <code>x + (y * WIDTH)</code>.
+</p>
+
+<p>
+  Let's create functions for these conversions, as they might come in handy
+  later. We'll put these functions at the end of the functions section.
+</p>
+
+<pre><code class="language-python">... (other functions)
+
+
+def idx_to_icoord(idx: int, width: int) -> tuple[int, int]:
+    return (idx % width, idx // width)
+
+
+def icoord_to_idx(x: int, y: int, width: int) -> int:
+    return x + (y * width)</code></pre>
+
+<p>
+  We can now update the code that modifies the buffer.
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        ...
+
+        # update the buffer
+        idx = icoord_to_idx(x, y, WIDTH)
+        buf[idx] = col</code></pre>
+
+<p>
+  Because of the way processors work, jumping around to random places in memory
+  is much slower than iterating it linearly, one block after another. It's
+  faster to access the elements of an array ordered by the index than to access
+  them in a random and/or unpredictable pattern. This explains why the outer
+  <em>for loop</em> goes through the height of the image while the inner loop
+  iterates through the width of the image. This way, <code>idx</code> is
+  incremented by 1 every time. If it were the other way around, it would be
+  incremented by <code>WIDTH</code> in every iteration, which would slow us down
+  by a lot.
+</p>
+
+<h2>Exporting</h2>
+<p>
+  Since we're not using a graphics API, or a library that uses a graphics API,
+  we can't really display our image on the screen. It would suck if we couldn't
+  see what we're rendering. That's where the fun is, after all. To work around
+  this, we can export our image to a PNG file and hand off the task of
+  displaying the image to an image viewer program, like the one that comes
+  default with your operating system. There are several Python libraries for
+  working with image files, but the one we'll use is
+  <a href="https://pillow.readthedocs.io/" target="_blank">Pillow</a>. You can
+  find the installation instructions
+  <a href="https://pillow.readthedocs.io/en/stable/installation/basic-installation.html" target="_blank">here</a>.
+  We'll start by importing the <code>Image</code> class from the library. We'll
+  put all import statements at the top of the script.
+</p>
+
+<pre><code class="language-python">from PIL import Image</code></pre>
+
+<p>
+  Back at the very bottom, we'll add this piece of code to export our image to
+  a PNG file.
+</p>
+
+<pre><code class="language-python"># export to PNG
+img: Image = Image.new('RGB', (WIDTH, HEIGHT))
+img.putdata(buf_rgb8)
+img.save(PNG_SAVE_PATH, 'PNG')</code></pre>
+
+<p>
+  Let's add a constant for the PNG save path in the constants section. You can
+  use any other path you want.
+</p>
+
+<pre><code class="language-python">PNG_SAVE_PATH: str = './cpu-triangle.png'</code></pre>
+
+<p>
+  What the <code>Image.putdata()</code> function expects from us is an array of
+  <code>tuple[int, int, int]</code>, but <code>buf</code> is an array of
+  <code>Color</code> objects, so we'll make a new buffer with the expected
+  format and copy the data from <code>buf</code>.
+</p>
+
+<pre><code class="language-python"># RGB8 buffer
+buf_rgb8: list[tuple[int, int, int]] = []
+for i in range(N_PIXELS):
+    col: Color = buf[i]
+    buf_rgb8.append(...)
+
+# export to PNG
+...</code></pre>
+
+<p>
+  So, how do we convert a <code>Color</code> to a tuple of integers? We could
+  just convert the <code>float</code> values from <code>Color</code> to
+  integers, but that wouldn't really work, because values like 0.5 would be
+  truncated down to 0. What Pillow expects is an integer in the [0, 255] range.
+  Said range comes from the fact that most everyday image files usually use
+  8-bit integers to store their values, and an 8-bit integer has 2 to the power
+  of 8 possible values: 256, which is exactly the number of integers we have
+  from 0 to 255. This is also why we named the new buffer <code>buf_rgb8</code>.
+  All we need to do now is to multiply our float values by 255 and convert them
+  to integers.
+</p>
+
+<pre><code class="language-python"># RGB8 buffer
+buf_rgb8: list[tuple[int, int, int]] = []
+for i in range(N_PIXELS):
+    col: Color = buf[i]
+    buf_rgb8.append((
+        int(col.r * 255),
+        int(col.g * 255),
+        int(col.b * 255)
+    ))</code></pre>
+
+<h2>Moment of Truth</h2>
+<p>
+  Let's open the exported file and see what it looks like.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-triangle-flipped.png" alt="an upside down triangle"
+  title="an upside down triangle" style="width: 28rem;" />
+
+<p>
+  Yay! We got a triangle... except it's kinda upside down. This is a typical
+  mistake you'll run into when moving image data between different libraries
+  or devices. In some libraries, including Pillow, the Y coordinate starts from
+  the top and goes down, which is opposite to what we have. Thankfully, there's
+  a simple fix for this: we flip Y when calculating the 1D index. Back in the
+  nested loops where we render our triangle, we'll modify the code that writes
+  to the buffer.
+</p>
+
+<pre><code class="language-python">for y in range(HEIGHT):
+    for x in range(WIDTH):
+        ...
+
+        # update the buffer
+        idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
+        buf[idx] = col</code></pre>
+
+<p>
+  If we run the script again, we get this image:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-triangle.png" alt="a triangle" title="a triangle"
+  style="width: 28rem;" />
+
+<p>
+  Congrats! You now know how to manually render a triangle from scratch without
+  ever using a graphics library. This seemingly insignificant piece of knowledge
+  is, in reality, highly valuable, and will greatly help us when we want to work
+  with an actual graphics API.
+</p>
+
+<p>
+  In the next article, we'll modify our code to be able to render multiple
+  triangles with different colors.
+</p>
