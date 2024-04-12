@@ -159,6 +159,9 @@ def compile_articles(
                         out_data,
                         {
                             'root_path': root_path_rel,
+                            'category_id': category.id,
+                            'category_name': category.name,
+                            'category_desc': category.desc,
                             'article_id': article.id,
                             'article_title': article.title,
                             'article_author': article.author,

@@ -153,7 +153,7 @@ p {
 }
 
 .article-title {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .small-detail {
@@ -225,4 +225,22 @@ p+img {
   text-decoration: none !important;
   color: #58FAF9;
   cursor: pointer;
+}
+
+.link-no-underline {
+  text-decoration: none !important;
+}
+
+.link-no-underline:hover {
+  text-decoration: none !important;
+}
+
+.link-no-color {
+  color: inherit;
+  text-decoration-color: inherit;
+}
+
+.link-no-color:hover {
+  color: inherit;
+  text-decoration-color: inherit;
 }
