@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../assets/css/style.css" />
 <link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
 <script src="../../assets/highlight/highlight.min.js"></script>
-  <title>Triangle From Scratch: Rasterization</title>
+  <title>Triangle From Scratch 3: Rasterization</title>
 </head>
 
 <body>
@@ -22,13 +22,13 @@
 </a>
 
     <article>
-      <h1 class="article-title">Triangle From Scratch: Rasterization</h1>
+      <h1 class="article-title">Triangle From Scratch 3: Rasterization</h1>
       <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
           href="../../index.html">Computer Graphics From Scratch</a></div>
       <br />
       <p>
   In
-  <a href="triangle-barycentric-coordinates.html" title="Triangle From Scratch: Inside or Outside?">the previous article</a>,
+  <a href="triangle-barycentric-coordinates.html" title="Triangle From Scratch 2: Inside or Outside?">the previous article</a>,
   we saw how we can determine if a point is inside a triangle, and we're now
   ready to render our triangle. The process of selecting pixels that fall inside
   a triangle is what we call rasterization, which is what every game and
@@ -243,8 +243,8 @@
 </p>
 
 <p>
-  Let's create functions for these conversions, as they might come in handy
-  later. We'll put these functions at the end of the functions section.
+  Let's create functions for these conversions. We'll add them at the end of the
+  functions section.
 </p>
 
 <pre><code class="language-python">... (other functions)
@@ -366,7 +366,7 @@ for i in range(N_PIXELS):
 <p>
   Yay! We got a triangle... except it's kinda upside down. This is a typical
   mistake you'll run into when moving image data between different libraries
-  or devices. In some libraries, including Pillow, the Y coordinate starts from
+  and devices. In some libraries, including Pillow, the Y coordinate starts from
   the top and goes down, which is opposite to what we have. Thankfully, there's
   a simple fix for this: we flip Y when calculating the 1D index. Back in the
   nested loops where we render our triangle, we'll modify the code that writes
@@ -399,8 +399,8 @@ for i in range(N_PIXELS):
   In the next article, we'll modify our code to be able to render multiple
   triangles with different colors.
 </p>
-      <div class="article-nav-container"><a class="prev-article-link" href="triangle-barycentric-coordinates.html" title="Previous article: Triangle From Scratch: Inside or Outside?">← Triangle From Scratch: Inside or Outside?</a>
-<a class="next-article-link" href="triangle-multiple.html" title="Next article: Triangle From Scratch: More Triangles">Triangle From Scratch: More Triangles →</a>
+      <div class="article-nav-container"><a class="prev-article-link" href="triangle-barycentric-coordinates.html" title="Previous article: Triangle From Scratch 2: Inside or Outside?">← Triangle From Scratch 2: Inside or Outside?</a>
+<a class="next-article-link" href="triangle-multiple.html" title="Next article: Triangle From Scratch 4: More Triangles">Triangle From Scratch 4: More Triangles →</a>
 </div>
     </article>
 

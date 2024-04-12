@@ -215,8 +215,8 @@
 </p>
 
 <p>
-  Let's create functions for these conversions, as they might come in handy
-  later. We'll put these functions at the end of the functions section.
+  Let's create functions for these conversions. We'll add them at the end of the
+  functions section.
 </p>
 
 <pre><code class="language-python">... (other functions)
@@ -338,7 +338,7 @@ for i in range(N_PIXELS):
 <p>
   Yay! We got a triangle... except it's kinda upside down. This is a typical
   mistake you'll run into when moving image data between different libraries
-  or devices. In some libraries, including Pillow, the Y coordinate starts from
+  and devices. In some libraries, including Pillow, the Y coordinate starts from
   the top and goes down, which is opposite to what we have. Thankfully, there's
   a simple fix for this: we flip Y when calculating the 1D index. Back in the
   nested loops where we render our triangle, we'll modify the code that writes
