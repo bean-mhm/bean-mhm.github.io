@@ -15,7 +15,7 @@
 
 :root {
   --pico-font-family: Rubik, system-ui, sans-serif;
-  --pico-border-radius: 0.7rem;
+  --pico-border-radius: 1rem;
 }
 
 * {
@@ -65,17 +65,18 @@
   .container {
     max-width: 95%;
   }
+
+  article {
+    margin-left: calc(-0.9 * var(--pico-spacing));
+    margin-right: calc(-0.9 * var(--pico-spacing));
+  }
 }
 
 @media only screen and (max-width: 400px) {
   :root {
     --pico-font-size: 93%;
-    --pico-block-spacing-vertical: 2.5rem;
+    --pico-block-spacing-vertical: 2rem;
     --pico-block-spacing-horizontal: 1.1rem;
-  }
-
-  .container {
-    max-width: 97%;
   }
 }
 
