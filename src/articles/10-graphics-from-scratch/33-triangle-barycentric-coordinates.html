@@ -98,9 +98,11 @@
   constants first, then classes, then functions, and finally the code section.
 </p>
 
+<p>
 <pre><code class="language-python"># |a| * |b| * sin(theta)
 def cross_2d(a: Vec2, b: Vec2) -> float:
     return (a.x * b.y) - (a.y * b.x)</code></pre>
+</p>
 
 <p>
   This function has another property: it tells us whether the vertices are
@@ -111,10 +113,12 @@ def cross_2d(a: Vec2, b: Vec2) -> float:
   counterclockwise order.
 </p>
 
+<p>
 <pre><code class="language-python"># triangle vertices
 v0 = Vec2(256, 48)
 v1 = Vec2(160, 192)
 v2 = Vec2(64, 48)</code></pre>
+</p>
 
 <h2>Quick Detour</h2>
 <p>
@@ -122,6 +126,7 @@ v2 = Vec2(64, 48)</code></pre>
   Barycentric coordinates. Of course, we'll use it for other things later.
 </p>
 
+<p>
 <pre><code class="language-python">class Vec3:
     x: float
     y: float
@@ -170,6 +175,7 @@ v2 = Vec2(64, 48)</code></pre>
 
     def __neg__(self):
         return Vec3(-self.x, -self.y, -self.z)</code></pre>
+</p>
 
 <h2>Caretsian to Barycentric</h2>
 <p>
@@ -179,6 +185,7 @@ v2 = Vec2(64, 48)</code></pre>
   the <code>cross_2d()</code> function.
 </p>
 
+<p>
 <pre><code class="language-python"># triangle vertices must be ordered counterclockwise
 def cart_to_bary(
     p: Vec2,
@@ -193,6 +200,7 @@ def cart_to_bary(
     )
     b /= Vec3.scalar(cross_2d(v1 - v0, v2 - v0))
     return b</code></pre>
+</p>
 
 <p>
   We're not using the (1/2) factor, since it gets canceled out because it also
@@ -214,8 +222,10 @@ def cart_to_bary(
   decide if <code>p</code> is inside or outside the triangle!
 </p>
 
+<p>
 <pre><code class="language-python">def bary_is_outside(b: Vec3) -> bool:
     return min(b.x, b.y, b.z) < 0</code></pre>
+</p>
 
 <h2>The Rendering</h2>
 <p>

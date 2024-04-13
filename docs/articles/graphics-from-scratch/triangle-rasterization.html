@@ -24,7 +24,7 @@
     <article>
       <h1 class="article-title">Triangle From Scratch 3: Rasterization</h1>
       <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
-          href="../../index.html">Computer Graphics From Scratch</a></div>
+          href="../../index.html">Graphics From Scratch</a></div>
       <br />
       <p>
   In
@@ -39,6 +39,8 @@
 <p>
   We'll add this nested loop at the bottom of the code section:
 </p>
+
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         # pixel center point
@@ -58,6 +60,7 @@
         # update the buffer
         idx = ...
         buf[idx] = col</code></pre>
+</p>
 
 <h2>Pixel Center</h2>
 <p>
@@ -67,12 +70,14 @@
   units from the integer coordinates of the pixel:
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         # pixel center point
         p = Vec2(x + .5, y + .5)
-    
+
     ...  </code></pre>
+</p>
 
 
 <h2>Indices and Ordering</h2>
@@ -247,6 +252,7 @@
   functions section.
 </p>
 
+<p>
 <pre><code class="language-python">... (other functions)
 
 
@@ -256,11 +262,13 @@ def idx_to_icoord(idx: int, width: int) -> tuple[int, int]:
 
 def icoord_to_idx(x: int, y: int, width: int) -> int:
     return x + (y * width)</code></pre>
+</p>
 
 <p>
   We can now update the code that modifies the buffer.
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         ...
@@ -268,6 +276,7 @@ def icoord_to_idx(x: int, y: int, width: int) -> int:
         # update the buffer
         idx = icoord_to_idx(x, y, WIDTH)
         buf[idx] = col</code></pre>
+</p>
 
 <p>
   Because of the way processors work, jumping around to random places in memory
@@ -297,24 +306,30 @@ def icoord_to_idx(x: int, y: int, width: int) -> int:
   put all import statements at the top of the script.
 </p>
 
+<p>
 <pre><code class="language-python">from PIL import Image</code></pre>
+</p>
 
 <p>
   Back at the very bottom, we'll add this piece of code to export our image to
   a PNG file.
 </p>
 
+<p>
 <pre><code class="language-python"># export to PNG
 img: Image = Image.new('RGB', (WIDTH, HEIGHT))
 img.putdata(buf_rgb8)
 img.save(PNG_SAVE_PATH, 'PNG')</code></pre>
+</p>
 
 <p>
   Let's add a constant for the PNG save path in the constants section. You can
   use any other path you want.
 </p>
 
+<p>
 <pre><code class="language-python">PNG_SAVE_PATH: str = './cpu-triangle.png'</code></pre>
+</p>
 
 <p>
   What the <code>Image.putdata()</code> function expects from us is an array of
@@ -323,6 +338,7 @@ img.save(PNG_SAVE_PATH, 'PNG')</code></pre>
   format and copy the data from <code>buf</code>.
 </p>
 
+<p>
 <pre><code class="language-python"># RGB8 buffer
 buf_rgb8: list[tuple[int, int, int]] = []
 for i in range(N_PIXELS):
@@ -331,6 +347,7 @@ for i in range(N_PIXELS):
 
 # export to PNG
 ...</code></pre>
+</p>
 
 <p>
   So, how do we convert a <code>Color</code> to a tuple of integers? We could
@@ -345,6 +362,7 @@ for i in range(N_PIXELS):
   to integers.
 </p>
 
+<p>
 <pre><code class="language-python"># RGB8 buffer
 buf_rgb8: list[tuple[int, int, int]] = []
 for i in range(N_PIXELS):
@@ -354,6 +372,7 @@ for i in range(N_PIXELS):
         int(col.g * 255),
         int(col.b * 255)
     ))</code></pre>
+</p>
 
 <h2>Moment of Truth</h2>
 <p>
@@ -373,6 +392,7 @@ for i in range(N_PIXELS):
   to the buffer.
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         ...
@@ -380,6 +400,7 @@ for i in range(N_PIXELS):
         # update the buffer
         idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
         buf[idx] = col</code></pre>
+</p>
 
 <p>
   If we run the script again, we get this image:

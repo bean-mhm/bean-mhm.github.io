@@ -45,6 +45,7 @@
   pseudocode.
 </p>
 
+<p>
 <pre><code class="language-python">class Color:
     red: float
     green: float
@@ -60,6 +61,7 @@ def calculate_pixel_color(x: int, y: int) -> Color:
 for y in range(HEIGHT):
     for x in range(WIDTH):
         pixels[y][x] = calculate_pixel_color(x, y)</code></pre>
+</p>
 
 <p>
   Notice how the <code>calculate_pixel_color()</code> function only depends on
@@ -68,12 +70,14 @@ for y in range(HEIGHT):
   better understand why that's the case, let's look at the following pseudocode.
 </p>
 
+<p>
 <pre><code class="language-python">def calculate_pixel_color(x: int, y: int) -> Color:
     return new Color(
       x * y,
       80,
       x + y
     )</code></pre>
+</p>
 
 <p>
   Suppose our image has 200 pixels in the horizontal direction and 100 in the

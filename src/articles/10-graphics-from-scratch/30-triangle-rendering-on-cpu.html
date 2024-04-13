@@ -39,15 +39,18 @@
   pixels which is the product of the width and height.
 </p>
 
+<p>
 <pre><code class="language-python">WIDTH: int = 320
 HEIGHT: int = 240
 N_PIXELS: int = WIDTH * HEIGHT</code></pre>
+</p>
 
 <p>
   Then, we'll create a <code>Color</code> class that holds red, green, and blue
   intensity values. We'll put this class at the bottom, below the constants.
 </p>
 
+<p>
 <pre><code class="language-python">class Color:
     r: float
     g: float
@@ -57,6 +60,7 @@ N_PIXELS: int = WIDTH * HEIGHT</code></pre>
         self.r = r
         self.g = g
         self.b = b</code></pre>
+</p>
 
 <p>
   Now, we need a way to represent our image, so we'll create an array of RGB
@@ -71,10 +75,12 @@ N_PIXELS: int = WIDTH * HEIGHT</code></pre>
   Put the following code at the bottom.
 </p>
 
+<p>
 <pre><code class="language-python"># create buffer and initialize all colors to black
 buf: list[Color] = []
 for i in range(N_PIXELS):
     buf.append(Color(0, 0, 0))</code></pre>
+</p>
 
 <h2>Vectors</h2>
 
@@ -95,6 +101,7 @@ for i in range(N_PIXELS):
   the actual code, which we'll call "the code section" from now on.
 </p>
 
+<p>
 <pre><code class="language-python">class Vec2:
     x: float
     y: float
@@ -102,6 +109,7 @@ for i in range(N_PIXELS):
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y</code></pre>
+</p>
 
 <p>
   It's useful to be able to construct a vector with uniform scalar values, so
@@ -109,12 +117,14 @@ for i in range(N_PIXELS):
   a <code>Vec2</code> with that number as its X and Y components.
 </p>
 
+<p>
 <pre><code class="language-python">class Vec2:
     ...
 
     @staticmethod
     def scalar(s: float):
         return Vec2(s, s)</code></pre>
+</p>
 
 <p>
   Every vector class needs basic arithmetic operations: addition, subtraction,
@@ -124,6 +134,7 @@ for i in range(N_PIXELS):
   </a> feature.
 </p>
 
+<p>
 <pre><code class="language-python">class Vec2:
     ...
 
@@ -154,6 +165,7 @@ for i in range(N_PIXELS):
     def __idiv__(self, other):
         self.x /= other.x
         self.y /= other.y</code></pre>
+</p>
 
 <p>
   A negation operator flips the signs of the components, so we could have
@@ -161,11 +173,13 @@ for i in range(N_PIXELS):
   <code>Vec2</code>.
 </p>
 
+<p>
 <pre><code class="language-python">class Vec2:
     ...
 
     def __neg__(self):
         return Vec2(-self.x, -self.y)</code></pre>
+</p>
 
 <p>
   We'll add a lot more functions for vectors in the future, but we'll stop here
@@ -179,6 +193,7 @@ for i in range(N_PIXELS):
   <code>v2</code>.
 </p>
 
+<p>
 <pre><code class="language-python"># create buffer and initialize all colors to black
 ...
 
@@ -186,6 +201,7 @@ for i in range(N_PIXELS):
 v0 = Vec2(64, 48)
 v1 = Vec2(160, 192)
 v2 = Vec2(256, 48)</code></pre>
+</p>
 
 <h2>The Rendering</h2>
 <p>

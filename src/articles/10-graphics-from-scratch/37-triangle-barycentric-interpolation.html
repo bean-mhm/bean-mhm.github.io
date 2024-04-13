@@ -19,6 +19,7 @@
   every vertex.
 </p>
 
+<p>
 <pre><code class="language-python">class Triangle:
     v0: Vec2
     v1: Vec2
@@ -44,12 +45,14 @@
         self.v2_col = v2_col
 
     ...</code></pre>
+</p>
 
 <p>
   Let's update the triangle list to account for the changes we just made. We'll
   also get rid of the second triangle to keep things simple for now.
 </p>
 
+<p>
 <pre><code class="language-python"># triangle list
 tris: list[Triangle] = []
 tris.append(Triangle(
@@ -60,12 +63,14 @@ tris.append(Triangle(
     v1_col=Color(.2, 1, .1),
     v2_col=Color(.1, .2, 1)
 ))</code></pre>
+</p>
 
 <p>
   Now, we need to update the render code to somehow interpolate the color. We'll
   also remove some redundant comments.
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         p = Vec2(x + .5, y + .5)
@@ -80,6 +85,7 @@ tris.append(Triangle(
 
         idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
         buf[idx] = col</code></pre>
+</p>
 
 <h2>It's Barycentric, Again</h2>
 <p>
@@ -91,7 +97,9 @@ tris.append(Triangle(
   coordinate, and adding them up:
 </p>
 
+<p>
 <pre><code>interpolated = (b0 * a) + (b1 * b) + (b2 * c)</code></pre>
+</p>
 
 <p>
   This makes sense, because if <code>b0</code> is 1, then we know that
@@ -118,6 +126,7 @@ tris.append(Triangle(
   list.
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         ...
@@ -132,6 +141,7 @@ tris.append(Triangle(
                 + (Vec3.scalar(bary.z) * tri.v2_col)
 
         ...</code></pre>
+</p>
 
 <h2>RGB Triplets Are Vectors in Disguise</h2>
 
@@ -149,6 +159,7 @@ tris.append(Triangle(
   <code>col.x/y/z</code> instead of <code>col.r/g/b</code>.
 </p>
 
+<p>
 <pre><code class="language-python"># RGB8 buffer
 buf_rgb8: list[tuple[int, int, int]] = []
 for i in range(N_PIXELS):
@@ -158,6 +169,7 @@ for i in range(N_PIXELS):
         int(col.y * 255),
         int(col.z * 255)
     ))</code></pre>
+</p>
 
 <p>
   And, we're done! If we rerun the script, this is what we'll get:

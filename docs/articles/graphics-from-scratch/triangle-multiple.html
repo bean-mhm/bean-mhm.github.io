@@ -24,7 +24,7 @@
     <article>
       <h1 class="article-title">Triangle From Scratch 4: More Triangles</h1>
       <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
-          href="../../index.html">Computer Graphics From Scratch</a></div>
+          href="../../index.html">Graphics From Scratch</a></div>
       <br />
       <p>
   In
@@ -46,6 +46,7 @@
   classes section.
 </p>
 
+<p>
 <pre><code class="language-python">class Triangle:
     v0: Vec2
     v1: Vec2
@@ -57,16 +58,19 @@
         self.v1 = v1
         self.v2 = v2
         self.col = col</code></pre>
+</p>
 
 <p>
   While we're at it, why not add a Barycentric conversion function?
 </p>
 
+<p>
 <pre><code class="language-python">class Triangle:
     ...
 
     def cart_to_bary(self, p: Vec2) -> Vec3:
         return cart_to_bary(p, self.v0, self.v1, self.v2)</code></pre>
+</p>
 
 <p>
   In the code section, we'll remove the block of code that defines the
@@ -74,6 +78,7 @@
   instead.
 </p>
 
+<p>
 <pre><code class="language-python"># create buffer and initialize all colors to black
 ...
 
@@ -93,11 +98,13 @@ tris.append(Triangle(
 ))
 
 ...</code></pre>
+</p>
 
 <p>
   We'll now update the nested loops to account for all triangles.
 </p>
 
+<p>
 <pre><code class="language-python">for y in range(HEIGHT):
     for x in range(WIDTH):
         # pixel center point
@@ -121,6 +128,7 @@ tris.append(Triangle(
         # update the buffer
         idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
         buf[idx] = col</code></pre>
+</p>
 
 <p>
   Let's rerun the script and observe the output.

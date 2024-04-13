@@ -24,7 +24,7 @@
     <article>
       <h1 class="article-title">The First Shader</h1>
       <div class="small-detail">bean • Apr 6, 2024 • <a class="link-no-color"
-          href="../../index.html">Computer Graphics From Scratch</a></div>
+          href="../../index.html">Graphics From Scratch</a></div>
       <br />
       <p>
   Remember the <code>calculate_pixel_color()</code> function from
@@ -53,12 +53,14 @@
   called <code>mix()</code> or <code>lerp()</code> in graphics programming.
 </p>
 
+<p>
 <pre><code class="language-python">def mix(
     start: float,
     end: float,
     how_much: float
 ) -> float:
     return start + how_much * (end - start)</code></pre>
+</p>
 
 <p>
   Try to fully understand how this works. If <code>how_much</code> is 0, the
@@ -114,6 +116,7 @@
   by 6 (the size of our range) to find <code>how_much</code>.
 </p>
 
+<p>
 <pre><code class="language-python"># returns t (the mix factor)
 def unmix(
     v: float,
@@ -121,12 +124,14 @@ def unmix(
     end: float
 ) -> float:
     return (v - start) / (end - start)</code></pre>
+</p>
 
 <p>
   After this <em>unmixing</em>, we can now <em>remix</em> in the output range,
   [500, 700].
 </p>
 
+<p>
 <pre><code class="language-python">def remap(
   v: float,
   input_start: float,
@@ -136,12 +141,14 @@ def unmix(
 ) -> float:
     how_much: float = unmix(v, input_start, input_end)
     return mix(output_start, output_end, how_much)</code></pre>
+</p>
 
 <p>
   If we use the actual math operations instead of calling <code>unmix()</code>
   and <code>mix()</code>, we get the following.
 </p>
 
+<p>
 <pre><code class="language-python">def remap(
   v: float,
   input_start: float,
@@ -151,6 +158,7 @@ def unmix(
 ) -> float:
     t: float = (v - input_start) / (input_end - input_start)
     return output_start + t * (output_end - output_start)</code></pre>
+</p>
 
 <p>
   This function basically figures out how much <code>v</code> has moved relative
@@ -164,6 +172,7 @@ def unmix(
   individually and effectively lerp between the two colors.
 </p>
 
+<p>
 <pre><code class="language-python">def mix_colors(
     a: Color,
     b: Color,
@@ -174,17 +183,20 @@ def unmix(
         green=mix(a.green, b.green, t),
         blue=mix(a.blue, b.blue, t)
     )</code></pre>
+</p>
 
 <p>
   We're finally ready to update our <code>calculate_pixel_color()</code>
   function to give us a blue-to-yellow gradient from left to right.
 </p>
 
+<p>
 <pre><code class="language-python">def calculate_pixel_color(x: int, y: int) -> Color:
     blue = Color(0, 0, 1)
     yellow = Color(1, 1, 0)
     t: float = x / width
     return mix_colors(blue, yellow, t)</code></pre>
+</p>
 
 <p>
   Keep in mind that, unlike <code>x</code> and <code>y</code> which vary for

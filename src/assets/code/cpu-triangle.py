@@ -102,31 +102,22 @@ class Vec3:
 
 
 class Triangle:
-    v0: Vec2
-    v1: Vec2
-    v2: Vec2
-    v0_col: Vec3
-    v1_col: Vec3
-    v2_col: Vec3
+    v: tuple[Vec2, Vec2, Vec2]
+    v_col: tuple[Vec3, Vec3, Vec3]
+    v_uv: tuple[Vec2, Vec2, Vec2]
 
     def __init__(
         self,
-        v0: Vec2,
-        v1: Vec2,
-        v2: Vec2,
-        v0_col: Vec3,
-        v1_col: Vec3,
-        v2_col: Vec3
+        v: tuple[Vec2, Vec2, Vec2],
+        v_col: tuple[Vec3, Vec3, Vec3],
+        v_uv: tuple[Vec2, Vec2, Vec2]
     ) -> None:
-        self.v0 = v0
-        self.v1 = v1
-        self.v2 = v2
-        self.v0_col = v0_col
-        self.v1_col = v1_col
-        self.v2_col = v2_col
+        self.v = v
+        self.v_col = v_col
+        self.v_uv = v_uv
 
     def cart_to_bary(self, p: Vec2) -> Vec3:
-        return cart_to_bary(p, self.v0, self.v1, self.v2)
+        return cart_to_bary(p, self.v[0], self.v[1], self.v[2])
 
 
 # |a| * |b| * sin(theta)
@@ -170,12 +161,38 @@ for i in range(N_PIXELS):
 # triangle list
 tris: list[Triangle] = []
 tris.append(Triangle(
-    v0=Vec2(256, 48),
-    v1=Vec2(160, 192),
-    v2=Vec2(64, 48),
-    v0_col=Vec3(1, .2, .1),
-    v1_col=Vec3(.2, 1, .1),
-    v2_col=Vec3(.1, .2, 1)
+    v=(
+        Vec2(0, 0),
+        Vec2(320, 0),
+        Vec2(0, 240)
+    ),
+    v_col=(
+        Vec3(.1, .2, .9),
+        Vec3(.9, .4, .1),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(0, 1),
+        Vec2(1, 1),
+        Vec2(0, 0)
+    )
+))
+tris.append(Triangle(
+    v=(
+        Vec2(320, 0),
+        Vec2(320, 240),
+        Vec2(0, 240)
+    ),
+    v_col=(
+        Vec3(.9, .4, .1),
+        Vec3(.9, .1, .6),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(1, 1),
+        Vec2(1, 0),
+        Vec2(0, 0)
+    )
 ))
 
 for y in range(HEIGHT):
@@ -188,9 +205,21 @@ for y in range(HEIGHT):
             if bary_is_outside(bary):
                 continue
 
-            col = (Vec3.scalar(bary.x) * tri.v0_col) \
-                + (Vec3.scalar(bary.y) * tri.v1_col) \
-                + (Vec3.scalar(bary.z) * tri.v2_col)
+            interp_col = \
+                (Vec3.scalar(bary.x) * tri.v_col[0]) \
+                + (Vec3.scalar(bary.y) * tri.v_col[1]) \
+                + (Vec3.scalar(bary.z) * tri.v_col[2])
+
+            interp_uv = \
+                (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+                + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+                + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+            col = Vec3(
+                interp_uv.x,
+                interp_uv.y,
+                0
+            )
 
         idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
         buf[idx] = col
