@@ -67,16 +67,20 @@
   }
 
   article {
-    margin-left: calc(-0.9 * var(--pico-spacing));
-    margin-right: calc(-0.9 * var(--pico-spacing));
+    margin-left: calc(-0.8 * var(--pico-spacing));
+    margin-right: calc(-0.8 * var(--pico-spacing));
   }
 }
 
 @media only screen and (max-width: 400px) {
   :root {
     --pico-font-size: 93%;
-    --pico-block-spacing-vertical: 2rem;
+    --pico-block-spacing-vertical: 1.9rem;
     --pico-block-spacing-horizontal: 1.1rem;
+  }
+
+  .container {
+    max-width: 97%;
   }
 }
 
