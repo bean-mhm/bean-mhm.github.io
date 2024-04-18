@@ -107,9 +107,9 @@ for y in range(HEIGHT):
   alt="independent RGB lamps being altered in parallel" title="independent RGB lamps being altered in parallel"
   style="width: 37rem;" />
 <p>
-  All of this is to say, parallelism matters a lot, and, if we can find a way to
+  All of this is to say, parallelism matters a lot. If we can find a way to
   <em>parallelize</em> our instructions instead of running them on each pixel
-  one-by-one, we can run them a lot faster.
+  one-by-one, we'll be done much faster.
 </p>
 <p>
   Or, can we?
@@ -122,7 +122,7 @@ for y in range(HEIGHT):
   they're not quite fast enough to render realistic scenes at 60 frames per
   second. This led to the creation of shaders on graphics card, which let you
   run the same instruction on all pixels at once. Well, it's a bit more
-  complicated than that, and there is still some amount of <em>serial</em> work,
+  complicated than that and there is still some amount of <em>serial</em> work,
   but for the sake of simplicity, you can assume all pixels are processed at
   once.
 </p>

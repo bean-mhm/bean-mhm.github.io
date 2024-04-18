@@ -40,9 +40,9 @@
   at the most fundumental level, 3D models are made up of triangles. It's common
   knowledge in graphics that GPUs are optimized for rendering triangles, and
   it makes sense too. A triangle is the simplest type of polygons there is, it
-  just has 3 vertices, and that's it. What about shaders, though? Shaders come
+  just has 3 vertices and that's it. What about shaders, though? Shaders come
   after triangles. The GPU first determines which pixels fall inside the
-  triangle, and runs what's called a fragment or pixel shader only for those
+  triangle and runs what's called a fragment or pixel shader only for those
   pixels. We'll explore this further a few articles later.
 </p>
 <p>
@@ -129,7 +129,7 @@ for i in range(N_PIXELS):
   velocity vectors, or even RGB triplets (with <code>Vec3</code>), and many more
   things. Some programmers like to have separate classes for each of them, even
   though they have very similar implementations. This separation of classes is
-  helpful to avoid bugs, and it's not necessary.
+  helpful to avoid bugs and it's not necessary.
 </p>
 
 <p>

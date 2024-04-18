@@ -64,7 +64,7 @@ tris.append(Triangle(
   style="width: 25rem;" />
 
 <p>
-  Pay attention to the comments after the vertex colors, and notice how the two
+  Pay attention to the comments after the vertex colors and notice how the two
   triangles have two common colors (orange and green). You can see this
   duplication in the vertex positions too. If we provide different colors for
   any of those shared vertices, we'll get unwanted seams, like the one in the
@@ -121,7 +121,7 @@ tris.append(Triangle(
 <h2>Barycentric Interpolation</h2>
 <p>
   Yeah, it's back, again. What graphics developers do is, they embed their UV
-  coordinates on the vertices of the triangles, and interpolate between them.
+  coordinates on the vertices of the triangles and interpolate between them.
   The is almost identical to how we interpolated vertex colors, with the
   difference that texture coordinates are 2D vectors instead of 3D. It's as if
   we say "this vertex needs to sample the texture at the bottom left, this one
@@ -404,7 +404,7 @@ for tri in tris:
   title="a colorful rectangle with different colors at each corner based on the UV coordinates" style="width: 25rem;" />
 
 <p>
-  This image is pretty iconic in graphics programming, and you'll encounter it
+  This image is pretty iconic in graphics programming and you'll encounter it
   every once in a while. Texture coordinates are not the only thing graphics
   programmers visualize with RGB. They visualize normal vectors (often just
   called normals), positions, height maps, and other types of data as well.
@@ -530,13 +530,13 @@ for y in range(HEIGHT):
 
 <p>
   Notice the inconsistency in the way we use integer coordinates. Sometimes we
-  use a tuple of integers, sometimes we separate them, and we have to access
-  them using indices: <code>sample_icoord[0]</code>. All of these issues would
-  be solved if we also had a class for integer vectors. In fact, most graphics
-  libraries, game engines, or even shading languages have built-in support for
-  integer vectors as well as other common types in linear algebra. We'll
-  write a linear algebra library from scratch later, but for now, we have to
-  make do.
+  use a tuple of integers and have to access them using indices:
+  <code>sample_icoord[0]</code>, and sometimes we separate them. All of these
+  issues would be solved if we also had a class for integer vectors. In fact,
+  most graphics libraries, game engines, or even shading languages have built-in
+  support for integer vectors as well as other common types in linear algebra.
+  We'll write a linear algebra library from scratch later, but for now, we have
+  to make do.
 </p>
 
 <p>

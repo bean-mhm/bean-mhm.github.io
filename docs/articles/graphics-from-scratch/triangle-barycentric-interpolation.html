@@ -47,7 +47,7 @@
 
 <p>
   This is great, but wouldn't it be cool if we could have different colors for
-  each vertex, and blend between them? Not just color, but anything else, like
+  each vertex and blend between them? Not just color, but anything else, like
   normal vectors, positions, or texture coordinates! Yes, we're getting closer
   to texturing, so be excited.
 </p>
@@ -131,7 +131,7 @@ tris.append(Triangle(
   <code>b2</code> are our Barycentric coordinates, and <code>a</code>,
   <code>b</code>, and <code>c</code> are the data on the vertices, we can blend
   between them by scaling each data value by its corresponding Barycentric
-  coordinate, and adding them up:
+  coordinate and adding them up:
 </p>
 
 <p>
@@ -186,9 +186,9 @@ tris.append(Triangle(
   Did you see it? There's a huge problem with the code above. We're trying to
   multiply a <code>Vec3</code> by a <code>Color</code>, which is an entirely
   separate class. We've talked about how we can treat RGB triplets as 3D
-  vectors, and how it's easier to not have separate classes for structures that
+  vectors and how it's easier to not have separate classes for structures that
   can be represented as vectors. Let's get rid of the <code>Color</code> class
-  entirely, and use <code>Vec3</code> instead. You can use the "find and
+  entirely and use <code>Vec3</code> instead. You can use the "find and
   replace" feature of your code editor to replace any occurance of
   <code>Color</code> with <code>Vec3</code>. Make sure it's case sensitive. If
   you're using VS Code, you need to enable the "Match Case" option. We're almost
@@ -209,7 +209,7 @@ for i in range(N_PIXELS):
 </p>
 
 <p>
-  And, we're done! If we rerun the script, this is what we'll get:
+  And we're done! If we rerun the script, this is what we'll get:
 </p>
 
 <img src="../../assets/images/articles/cpu-triangle-interpolated.png"
