@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>Functions</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">Functions</h1>
+      <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
+          href="../../index.html#graphics-from-scratch">Graphics From Scratch</a></div>
+      <br />
+      <p class="small-detail">
+  <em>
+    This article is part of
+    <a class="link-no-color" href="../../index.html#graphics-from-scratch">Graphics From Scratch</a>,
+    a series of articles on computer graphics. Start from the beginning if you
+    want to know what's going on.
+  </em>
+</p>
+
+<p>
+  You might have heard that functions are like mathematical devices that take
+  something as input and spit out something else based on the input. Here's a
+  very simple function:
+</p>
+
+<img src="../../assets/images/articles/function-device.png"
+  alt="a square labeled f representing a function with x as the input and x+1 as the output"
+  title="a square labeled f representing a function with x as the input and x+1 as the output" style="width: 24rem;" />
+
+<p>
+  This function takes in a number as input and returns one plus that number. A
+  function can technically ignore its input and always return a constant value.
+</p>
+
+<img src="../../assets/images/articles/function-constant.png"
+  alt="a function that ignores its input and always returns the same constant value"
+  title="a function that ignores its input and always returns the same constant value" style="width: 24rem;" />
+
+<p>
+  Some functions take more than one input and mix them in different ways.
+</p>
+
+<img src="../../assets/images/articles/function-2d.png"
+  alt="a function that takes in two inputs (x and y) and returns x - y"
+  title="a function that takes in two inputs (x and y) and returns x - y" style="width: 24rem;" />
+
+<p>
+  The number of inputs that a function takes is its dimensionality. The above is
+  a two-dimensional function because it takes two variables as input.
+</p>
+
+<p>
+  Here's the definition of a function copied straight from Wikipedia:
+</p>
+
+<blockquote>
+  In mathematics, a function from a set X to a set Y assigns to each element of
+  X exactly one element of Y. The set X is called the domain of the function and
+  the set Y is called the codomain of the function.
+</blockquote>
+
+<p>
+  A function basically draws an arrow between the elements in the input set (the
+  domain of the function) to the elements in the set of all possible outputs,
+  called the range of the function. These sets can be infinitely large, like the
+  set of all real numbers.
+</p>
+
+<p>
+  Functions can also take vectors as inputs and return vectors as their output,
+  and they don't need to have the same dimensionality. Here's a function that
+  takes in a single number and returns a 2D vector:
+</p>
+
+<img src="../../assets/images/articles/function-1d-2dout.png"
+  alt="a function that takes in a scalar and outputs a 2D vector"
+  title="a function that takes in a scalar and outputs a 2D vector" style="width: 24rem;" />
+
+<h2>Visualizing Functions</h2>
+<p>
+  People have come up with different ways for visualizing functions of different
+  dimensions and types, the simplest of which being 1D functions which take a
+  single variable as input and spit out a single number. As you already know,
+  the common way to visualize 1D functions is to graph them. Below is a
+  basic sinusoidal function and its graph in
+  <a href="https://www.desmos.com/calculator" target="_blank">Desmos</a>, a
+  popular online graphing calculator.
+</p>
+
+<img src="../../assets/images/articles/function-graph-desmos.png"
+  alt="a 1D sinusoidal function and its graph in Desmos" title="a 1D sinusoidal function and its graph in Desmos"
+  style="width: 36rem;" />
+
+<p>
+  Things get a bit complicated when we go 2D. First of all, there are many
+  different "types" of functions. Some 2D functions take in a 2D vector
+  representing a point on the 2D plane and output another 2D vector representing
+  some quantity at that point, like the electric field. These are called vector
+  fields because they return a vector for every point in space. A common way to
+  visualize them is to use arrows on a grid of points.
+</p>
+
+<img src="../../assets/images/articles/desmos-vector-field.png"
+  alt="visualization of a 2D vector field with arrows on a grid of points"
+  title="visualization of a 2D vector field with arrows on a grid of points" style="width: 36rem;" />
+
+<p>
+  Some 2D functions output a single number (a scalar) for every point. These
+  are often visualized with 3D surfaces where the height (Z) is equal to the
+  output of the function at that point (X and Y).
+</p>
+
+<img src="../../assets/images/articles/desmos3d.png"
+  alt="a 2D function that outputs a scalar for every point visualized with a 3D surface"
+  title="a 2D function that outputs a scalar for every point visualized with a 3D surface" style="width: 36rem;" />
+
+<p>
+  We can actually treat our renderer as a function too! It takes the coordinates
+  of a pixel as input and outputs an RGB color triplet represented as a 3D
+  vector. To prove this, I and my friend have made a fully functional (as in,
+  using pure functions)
+  <a href="https://www.desmos.com/calculator/2bqijvuyh2" target="_blank">ray tracer in Desmos</a>.
+</p>
+
+<img src="../../assets/images/articles/desmos-rt.png" alt="a 3D sphere with basic lighting in Desmos"
+  title="a 3D sphere with basic lighting in Desmos" style="width: 52rem;" />
+
+<p>
+  Texture samplers are another example of 2D functions that map 2D points to RGB
+  triplets. Samplers with different wrap modes can be thought of as different 2D
+  functions. Although, technically, we <em>can</em> have 1D or even 3D textures,
+  but we'll stick to working with 2D textures for now.
+</p>
+
+<p>
+  This article was meant to be a quick reminder on functions and how we can
+  treat renderers, shaders, or texture samplers as functions. In the next one,
+  we'll explore interesting effects that can be achieved by manipulating our
+  sample point, AKA the input we give to the sampler.
+</p>
+      <div class="article-nav-container"><a class="prev-article-link" href="bilinear.html" title="Previous article: Bilinear Interpolation">← Bilinear Interpolation</a>
+<a class="next-article-link" href="domain-transformations.html" title="Next article: Domain Transformations">Domain Transformations →</a>
+</div>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>
