@@ -1,0 +1,8 @@
+article_id = "bilinear"
+article_title = "Bilinear Interpolation"
+article_author = "$-blog_author-$"
+article_date = "2024-04-11"
+article_visible = true
+article_contents = "$--load--$(\"45-bilinear.html\")"
+
+[vars]

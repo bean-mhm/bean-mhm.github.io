@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../assets/css/style.css" />
 <link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
 <script src="../../assets/highlight/highlight.min.js"></script>
-  <title>Triangle From Scratch 6: Textures</title>
+  <title>Textures</title>
 </head>
 
 <body>
@@ -22,13 +22,13 @@
 </a>
 
     <article>
-      <h1 class="article-title">Triangle From Scratch 6: Textures</h1>
+      <h1 class="article-title">Textures</h1>
       <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
           href="../../index.html">Graphics From Scratch</a></div>
       <br />
       <p>
   In
-  <a href="triangle-barycentric-interpolation.html" title="Triangle From Scratch 5: Interpolation">the previous article</a>,
+  <a href="triangle-barycentric-interpolation.html" title="Triangle: Interpolation">the previous article</a>,
   we interpolated colors between the vertices of a triangle. In this one we're
   going to interpolate texture coordinates and render an image on a rectangle.
 </p>
@@ -344,7 +344,7 @@ for tri in tris:
     if bary_is_outside(bary):
         continue
 
-    interp_col = \
+    interp_col: Vec3 = \
         (Vec3.scalar(bary.x) * tri.v_col[0]) \
         + (Vec3.scalar(bary.y) * tri.v_col[1]) \
         + (Vec3.scalar(bary.z) * tri.v_col[2])
@@ -366,12 +366,12 @@ for tri in tris:
     if bary_is_outside(bary):
         continue
 
-    interp_col = \
+    interp_col: Vec3 = \
         (Vec3.scalar(bary.x) * tri.v_col[0]) \
         + (Vec3.scalar(bary.y) * tri.v_col[1]) \
         + (Vec3.scalar(bary.z) * tri.v_col[2])
 
-    interp_uv = \
+    interp_uv: Vec2 = \
         (Vec2.scalar(bary.x) * tri.v_uv[0]) \
         + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
         + (Vec2.scalar(bary.z) * tri.v_uv[2])
@@ -401,12 +401,12 @@ for tri in tris:
             if bary_is_outside(bary):
                 continue
 
-            interp_col = \
+            interp_col: Vec3 = \
                 (Vec3.scalar(bary.x) * tri.v_col[0]) \
                 + (Vec3.scalar(bary.y) * tri.v_col[1]) \
                 + (Vec3.scalar(bary.z) * tri.v_col[2])
 
-            interp_uv = \
+            interp_uv: Vec2 = \
                 (Vec2.scalar(bary.x) * tri.v_uv[0]) \
                 + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
                 + (Vec2.scalar(bary.z) * tri.v_uv[2])
@@ -429,74 +429,251 @@ for tri in tris:
   alt="a colorful rectangle with different colors at each corner based on the UV coordinates"
   title="a colorful rectangle with different colors at each corner based on the UV coordinates" style="width: 25rem;" />
 
+<p>
+  This image is pretty iconic in graphics programming, and you'll encounter it
+  every once in a while. Texture coordinates are not the only thing graphics
+  programmers visualize with RGB. They visualize normal vectors (often just
+  called normals), positions, height maps, and other types of data as well.
+  Besides looking cool, these visualizations help us find problems in our data
+  and the algorithms that generate them.
+</p>
+
+<h2>Loading a Texture</h2>
+<p>
+  Let's use the Pillow library again to load a texture into memory so that we
+  can sample it. This is the image we're gonna use as the texture:
+</p>
+
+<img src="../../assets/images/articles/test-texture.png"
+  alt="a solid background with some text and patterns on it"
+  title="a solid background with some text and patterns on it" style="width: 10rem;" />
+
+<p>
+  Download the texture from
+  <a href="../../assets/images/articles/test-texture.png" target="_blank">here</a>
+  and place it in the same directory as that of your script file. Then, add a
+  new constant for the texture path.
+</p>
+
+<p>
+<pre><code class="language-python">WIDTH: int = 320
+HEIGHT: int = 240
+N_PIXELS: int = WIDTH * HEIGHT
+
+TEXTURE_PATH: str = './test-texture.png'
+PNG_SAVE_PATH: str = './cpu-triangle.png'</code></pre>
+</p>
+
+<p>
+  Next, we'll add a new block of code before the render block to load the
+  texture. We'll also add a comment for the render block for more clarity.
+</p>
+
+<p>
+<pre><code class="language-python"># triangle list
+...
+
+# load the texture
+tex = Image.open(TEXTURE_PATH).convert(mode='RGB')
+tex_data: list[tuple[int, int, int]] = list(tex.getdata())
+
+# render
+for y in range(HEIGHT):
+    for x in range(WIDTH):
+        ...</code></pre>
+</p>
+
 <h2>Nearest Neighbor</h2>
-
-<h2>Bilinear</h2>
-
-
-
-
-
-
-<h2>Textures & Sampling</h2>
 <p>
-  If you're a gamer or a game developer, you most definitely already know what a
-  texture is, probably better than me, but I'm still gonna explain it very
-  briefly to avoid confusion for the non-computer-savvy audience.
-</p>
-<p>
-  Textures are just images. Here's an example:
-</p>
-
-<img src="../../assets/images/articles/grass-texture.jpg" alt="green grass field during daytime"
-  title="green grass field during daytime" style="width: 20rem;" />
-
-<p>
-  We can do anything we want with a texture. More specifically, we can "sample"
-  or read colors from any part of the texture in any way we want. We can sample
-  it in a repeating pattern by wrapping our sample point so that it doesn't
-  leave the boundaries.
-</p>
-
-<img src="../../assets/images/articles/grass-texture-rep.jpg" alt="a repeating grass texture"
-  title="a repeating grass texture" style="width: 20rem;" />
-
-<p>
-  We can rotate our sample point by 5 degrees counterclockwise, which will make
-  the texture appear rotated by 5 degrees clockwise.
-</p>
-
-<img src="../../assets/images/articles/grass-texture-rot.jpg" alt="grass texture with slight rotation"
-  title="grass texture with slight rotation" style="width: 20rem;" />
-
-<p>
-  We can offset our sample points to the right, which will make the texture
-  appear as if it moved to the left.
-</p>
-
-<img src="../../assets/images/articles/grass-texture-offs.jpg" alt="grass texture with slight offset"
-  title="grass texture with slight offset" style="width: 20rem;" />
-
-
-
-
-
-
-
-
-
-<p>
-  What we did is called <em>software rendering</em>, which uses the CPU to
-  render graphics. It's often significantly slower than
-  <em>hardware rendering</em>, which utilizes the parallelism of a GPU to speed
-  up the process.
+  In the render block, after we compute the interpolated UV coordinates, we'll
+  convert them to the actual coordinates of the sample point by multiplying
+  them with the width and height of the texture.
 </p>
 
 <p>
-  Here's the full source code if youre interested.
+<pre><code class="language-python">...
+
+    for tri in tris:
+        ...
+
+        interp_uv: Vec2 = \
+            (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+            + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+            + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+        sample_point = Vec2(
+            interp_uv.x * tex.width,
+            interp_uv.y * tex.height
+        )
+
+        ...
+
+...</code></pre>
 </p>
-      <div class="article-nav-container"><a class="prev-article-link" href="triangle-barycentric-interpolation.html" title="Previous article: Triangle From Scratch 5: Interpolation">← Triangle From Scratch 5: Interpolation</a>
-<a class="next-article-link" href="graphics-pipeline.html" title="Next article: The Graphics Pipeline">The Graphics Pipeline →</a>
+
+<p>
+  We can simplify this down to:
+</p>
+
+<p>
+<pre><code class="language-python">sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)</code></pre>
+</p>
+
+<p>
+  There's very little chance our sample point would fall exactly on the center
+  of one of the pixels in the texture. This is pretty usual in texture sampling.
+  We have a point we want to read the color at, but we can only access discrete
+  pixels with integer coordinates. People have come up with many different ways
+  to do this with varying levels of quality, the simplest of them being the
+  "nearest neighbor" method. The way it works is in its name. To find the
+  nearest integer coordinates to a point, we just need to floor it. We
+  <em>could</em> import Python's math library to use its <code>floor()</code>
+  function, but casting a float to an integer already truncates it. Truncating
+  a number isn't exactly the same as flooring it, but it is for positive
+  numbers.
+</p>
+<p>
+  We'll add a new variable <code>sample_icoord</code>, short for "sample integer
+  coordinates", right below <code>sample_point</code>.
+</p>
+
+<p>
+<pre><code class="language-python">sample_icoord = (int(sample_point.x), int(sample_point.y))</code></pre>
+</p>
+
+<p>
+  To read from the texture data, we need a 1D index, so we'll use the
+  <code>icoord_to_idx()</code> function we made before.
+</p>
+
+<p>
+<pre><code class="language-python">sample_idx = icoord_to_idx(
+    sample_icoord[0],
+    sample_icoord[1],
+    tex.width
+)</code></pre>
+</p>
+
+<p>
+  Notice the inconsistency in the way we use integer coordinates. Sometimes we
+  use a tuple of integers, sometimes we separate them, and we have to access
+  them using indices: <code>sample_icoord[0]</code>. All of these issues would
+  be solved if we also had a class for integer vectors. In fact, most graphics
+  libraries, game engines, or even shading languages have built-in support for
+  integer vectors as well as other common types in linear algebra. We'll
+  write a linear algebra library from scratch later, but for now, we have to
+  make do.
+</p>
+
+<p>
+  At this point, we're ready to read the color from the texture data.
+</p>
+
+<p>
+<pre><code class="language-python">tex_col: Vec3 = tex_data[sample_idx]</code></pre>
+</p>
+
+<p>
+  Can you spot anything wrong? Yeah, Pillow doesn't know about
+  <code>Vec3</code>. It provides us with a tuple of integers ranging from 0 to
+  255, so we'll need to do a bit of conversion.
+</p>
+
+<p>
+<pre><code class="language-python">tex_col_rgb8: tuple[int, int, int] = tex_data[sample_idx]
+tex_col = Vec3(
+    tex_col_rgb8[0] / 255,
+    tex_col_rgb8[1] / 255,
+    tex_col_rgb8[2] / 255
+)</code></pre>
+</p>
+
+<p>
+  Let's now set the final color to the color we sampled from our texture.
+</p>
+
+<p>
+<pre><code class="language-python">col = tex_col</code></pre>
+</p>
+
+<p>
+  With that, our render block will look like this:
+</p>
+
+<p>
+<pre><code class="language-python"># render
+for y in range(HEIGHT):
+    for x in range(WIDTH):
+        p = Vec2(x + .5, y + .5)
+
+        col = Vec3(.1, .1, .1)
+        for tri in tris:
+            bary: Vec3 = tri.cart_to_bary(p)
+            if bary_is_outside(bary):
+                continue
+
+            interp_col: Vec3 = \
+                (Vec3.scalar(bary.x) * tri.v_col[0]) \
+                + (Vec3.scalar(bary.y) * tri.v_col[1]) \
+                + (Vec3.scalar(bary.z) * tri.v_col[2])
+
+            interp_uv: Vec2 = \
+                (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+                + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+                + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+            sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
+            sample_icoord = (int(sample_point.x), int(sample_point.y))
+            sample_idx = icoord_to_idx(
+                sample_icoord[0],
+                sample_icoord[1],
+                tex.width
+            )
+
+            tex_col_rgb8: tuple[int, int, int] = tex_data[sample_idx]
+            tex_col = Vec3(
+                tex_col_rgb8[0] / 255,
+                tex_col_rgb8[1] / 255,
+                tex_col_rgb8[2] / 255
+            )
+
+            col = tex_col
+
+        idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
+        buf[idx] = col</code></pre>
+</p>
+
+<p>
+  Let's rerun the script and see what we get.
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-texture-stretched.png" alt="stretched texture"
+  title="stretched texture" style="width: 20rem;" />
+
+<p>
+  Already, we can see two glaring issues with the output:
+</p>
+
+<p>
+<ul>
+  <li>It's highly pixelated.</li>
+  <li>It's stretched horizontally.</li>
+</ul>
+</p>
+
+<p>
+  The first issue comes from the fact that we're using the nearest neighbor
+  method for sampling. The latter is the case simply because our quad has a
+  different width-to-height ratio than that of the texture. This is often called
+  the aspect ratio, as you might already know.
+</p>
+
+<p>
+  We'll work on the first issue by learning and implementing bilinear
+  interpolation in the next article.
+</p>
+      <div class="article-nav-container"><a class="prev-article-link" href="triangle-barycentric-interpolation.html" title="Previous article: Triangle: Interpolation">← Triangle: Interpolation</a>
+<a class="next-article-link" href="bilinear.html" title="Next article: Bilinear Interpolation">Bilinear Interpolation →</a>
 </div>
     </article>
 

@@ -1,0 +1,8 @@
+article_id = "textured-quad"
+article_title = "Textures"
+article_author = "$-blog_author-$"
+article_date = "2024-04-11"
+article_visible = true
+article_contents = "$--load--$(\"39-textured-quad.html\")"
+
+[vars]

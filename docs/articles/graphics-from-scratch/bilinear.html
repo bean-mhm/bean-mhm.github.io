@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../assets/pico-main/css/pico.violet.min.css" />
+<link rel="stylesheet" href="../../assets/css/style.css" />
+<link rel="stylesheet" href="../../assets/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="../../assets/highlight/highlight.min.js"></script>
+  <title>Bilinear Interpolation</title>
+</head>
+
+<body>
+  <main class="container">
+    <a class="blog-info-container" href="../../index.html" title="bit bending with bean">
+  <img class="blog-icon pass-click" src="../../assets/images/icon.png" alt="blog icon" />
+  <div class="pass-click">
+    <h2 class="blog-name pass-click">bit bending with bean</h2>
+    <h4 class="blog-desc pass-click">shaders • physics • computers • math </h4>
+  </div>
+</a>
+
+    <article>
+      <h1 class="article-title">Bilinear Interpolation</h1>
+      <div class="small-detail">bean • Apr 11, 2024 • <a class="link-no-color"
+          href="../../index.html">Graphics From Scratch</a></div>
+      <br />
+      <p>
+  This rings a bell, doesn't it? Ah, <em>bi</em>-linear interpolation! This is
+  just the two-dimensional version of linear interpolation, and the way it works
+  is highly intuitive.
+</p>
+<p>
+  Consider these 4 points.
+</p>
+
+<img src="../../assets/images/articles/bilinear-abcd.png"
+  alt="four points on an invisible square labeled a through d starting from the bottom left and going zig-zag"
+  title="four points on an invisible square labeled a through d starting from the bottom left and going zig-zag"
+  style="width: 15rem;" />
+
+<p>
+  Let's add a normal 1D linear interpolation between <code>a</code> and
+  <code>b</code>.
+</p>
+
+<img src="../../assets/images/articles/bilinear-abcd-lerp-ab.png"
+  alt="a double-sided arrow between a and b representing a linear interpolation between them"
+  title="a double-sided arrow between a and b representing a linear interpolation between them" style="width: 15rem;" />
+
+<p>
+  Now, let's add another interpolation, this time between <code>c</code> and
+  <code>d</code>, using the same blend weight (t).
+</p>
+
+<img src="../../assets/images/articles/bilinear-abcd-lerp-horiz.png" alt="a new interpolation between c and d"
+  title="a new interpolation between c and d" style="width: 15rem;" />
+
+<p>
+  Let's summarize what we have so far in a code example.
+</p>
+
+<p>
+<pre><code class="language-python">a: float = ... (some number)
+b: float = ...
+c: float = ...
+d: float = ...
+
+# blend weight / mix amount / time from 0 to 1
+t: float = ...
+
+interp_ab: float = mix(a, b, t)
+interp_cd: float = mix(c, d, t)
+</code></pre>
+</p>
+
+<p>
+  What we're doing are two interpolations in the horizontal direction. If we now
+  add a vertical interpolation between the two interpolated values at the bottom
+  and top, this time with a potentially different blend weight, we have done
+  bilinear interpolation.
+</p>
+
+<img src="../../assets/images/articles/bilinear-abcd-lerp-horiz-vert.png"
+  alt="a new vertical interpolation between the two already interpolated values at the bottom and the top"
+  title="a new vertical interpolation between the two already interpolated values at the bottom and the top"
+  style="width: 15rem;" />
+
+<p>
+  Let's add this new interpolation in the code example.
+</p>
+
+<p>
+<pre><code class="language-python">a: float = ... (some number)
+b: float = ...
+c: float = ...
+d: float = ...
+
+# horizontal and vertical blend weights
+t_horz: float = ...
+t_vert: float = ...
+
+interp_ab: float = mix(a, b, t_horz)
+interp_cd: float = mix(c, d, t_horz)
+
+interp_abcd: float = mix(
+    interp_ab,
+    interp_cd,
+    t_vert
+)
+</code></pre>
+</p>
+
+<p>
+  A cool property of this is, if we first interpolated vertically from
+  <code>a</code> to <code>c</code> and from <code>b</code> to <code>d</code>,
+  and then interpolated between the two interpolated values at the left and
+  right, we would still get the same result.
+</p>
+
+<p>
+  Let's turn what we just learned into a new function for bilinear
+  interpolation. We'll also define a 1D linear interpolation function.
+</p>
+
+<p>
+<pre><code class="language-python">def mix(a: float, b: float, t: float) -> float:
+    return a + t * (b - a)
+
+
+def mix_bilinear(
+    bl: float,  # value at the bottom left
+    br: float,  # bottom right
+    tl: float,  # top left
+    tr: float,  # top right
+    t_horz: float,  # blend weight from left to right
+    t_vert: float  # blend weight from bottom to top
+) -> float:
+    return mix(
+        mix(bl, br, t_horz),
+        mix(tl, tr, t_horz),
+        t_vert
+    )</code></pre>
+</p>
+
+<p>
+  Back in the render block, in the triangle loop, here's how we're currently
+  sampling the texture:
+</p>
+
+<p>
+<pre><code class="language-python">sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
+sample_icoord = (int(sample_point.x), int(sample_point.y))
+sample_idx = icoord_to_idx(
+    sample_icoord[0],
+    sample_icoord[1],
+    tex.width
+)
+
+tex_col_rgb8: tuple[int, int, int] = tex_data[sample_idx]
+tex_col = Vec3(
+    tex_col_rgb8[0] / 255,
+    tex_col_rgb8[1] / 255,
+    tex_col_rgb8[2] / 255
+)
+
+col = tex_col</code></pre>
+</p>
+
+<p>
+  We're only reading one color from the texture, but we need 4 for
+  bilinear interpolation. Specifically, we need to find the four closest pixels
+  to our sample point in the texture.
+</p>
+<p>
+  Consider the following example.
+</p>
+
+<img src="../../assets/images/articles/sample-point.png"
+  alt="4 squares representing 4 pixels, and a sample point" title="4 squares representing 4 pixels, and a sample point"
+  style="width: 15rem;" />
+
+<p>
+  Let's mark the center points of the four closest pixels.
+</p>
+
+<img src="../../assets/images/articles/sample-point-closest-pixel-centers.png"
+  alt="center points of the 4 closest pixels marked with dots"
+  title="center points of the 4 closest pixels marked with dots" style="width: 15rem;" />
+
+<p>
+  The question is, how do we figure out the integer coordinates of these 4
+  pixels in code?
+</p>
+<p>
+  If we find the integer coordinates of one of them (e.g. the bottom left one),
+  we can get the integer coordinates of the other ones by offsetting the first
+  one in one of the axes, or both of them. Let's pretend we have calculated the
+  integer coordinates for the closest pixel at the bottom left, and we don't
+  know about the other ones.
+</p>
+
+<img src="../../assets/images/articles/sample-point-bl-closest-pixel.png"
+  alt="only the bottom left closest pixel is marked" title="only the bottom left closest pixel is marked"
+  style="width: 15rem;" />
+
+<p>
+  The closest integer coordinates at the bottom left turn out to be (2, 1). With
+  that, you should be able to easily calculate the other ones. The bottom right
+  integer coordinates are offset from the bottom left coordinates by 1 unit in
+  the X axis. The top left coordinates are offset by 1 unit in the Y axis, and
+  the top right coordinates are offset by 1 unit in both axes.
+</p>
+<p>
+  Our job is now simplified down to finding the integer coordinates for only the
+  bottom left closest pixel. Here's a reminder that the center coordinates of a
+  pixel are offset by 0.5 units from its integer coordinates in both axes, so we
+  need to subtract (0.5, 0.5) from our sample point so that the fractional parts
+  become relative to the center of the pixel that's closer to (0, 0). We then
+  need to floor the result to get the integer coordinates of the pixel that's
+  closer to (0, 0), also known as the bottom left closest pixel.
+</p>
+<p>
+  After that, we can easily calculate the other three closest integer
+  coordinates to our sample point. Let's go back to the render block to
+  calculate the integer coordinates of the four closest pixels. We'll use short
+  forms of the terms bottom left (<code>bl</code>), bottom
+  right (<code>br</code>), and so on.
+</p>
+
+<p>
+<pre><code class="language-python">sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
+
+icoord_bl = (int(sample_point.x - .5), int(sample_point.y - .5))
+icoord_br = (icoord_bl[0] + 1, icoord_bl[1] + 0)
+icoord_tl = (icoord_bl[0] + 0, icoord_bl[1] + 1)
+icoord_tr = (icoord_bl[0] + 1, icoord_bl[1] + 1)</code></pre>
+</p>
+
+<p>
+  Notice how I used the "cast to integer" method again for truncating. Well, in
+  this specific case, we do need the real floor function from Python's math
+  library, because negative numbers will matter. We'll add a new import
+  statement at the very top of the script.
+</p>
+
+<p>
+<pre><code class="language-python">import math</code></pre>
+</p>
+
+<p>
+  Then, we'll use <code>math.floor()</code> instead of casting floats to
+  integers. Note that we still need to cast to integers after flooring to
+  actually get the <code>int</code> type.
+</p>
+
+<p>
+<pre><code class="language-python">icoord_bl = (
+    int(math.floor(sample_point.x - .5)),
+    int(math.floor(sample_point.y - .5))
+)
+icoord_br = ...
+icoord_tl = ...
+icoord_tr = ...</code></pre>
+</p>
+
+<p>
+  Next, we need to read the color of the texture four times. We could calculate
+  the 1D index and perform 8-bit conversions for every read, but that would
+  really pollute the code with duplication and redundancy, so we'll add a tiny
+  helper function in the functions section for fetching a color from a texture
+  at the specified integer coordinates.
+</p>
+
+<p>
+<pre><code class="language-python">def texel_fetch(
+    tex: Image,
+    tex_data: list[tuple[int, int, int]],
+    icoord: tuple[int, int]
+) -> Vec3:
+    idx = icoord_to_idx(
+        icoord[0],
+        icoord[1],
+        tex.width
+    )
+
+    col_rgb8: tuple[int, int, int] = tex_data[idx]
+    return Vec3(
+        col_rgb8[0] / 255.,
+        col_rgb8[1] / 255.,
+        col_rgb8[2] / 255.
+    )</code></pre>
+</p>
+
+<p>
+  The term "texel" is short for "texture element", much like "pixel" is short
+  for "picture element". There is little difference between the two.
+</p>
+<p>
+  Back in the render block, we can now read the four colors from the four
+  closest pixels (or texels).
+</p>
+
+<p>
+<pre><code class="language-python">col_bl: Vec3 = texel_fetch(tex, tex_data, icoord_bl)
+col_br: Vec3 = texel_fetch(tex, tex_data, icoord_br)
+col_tl: Vec3 = texel_fetch(tex, tex_data, icoord_tl)
+col_tr: Vec3 = texel_fetch(tex, tex_data, icoord_tr)</code></pre>
+</p>
+
+<p>
+  We're ready to do bilinear interpolation now.
+</p>
+
+<p>
+<pre><code class="language-python">col: Vec3 = mix_bilinear(
+    col_bl,
+    col_br,
+    col_tl,
+    col_tr,
+    t_horz=...,
+    t_vert=...
+)</code></pre>
+</p>
+
+<p>
+  There are two problems with this. First of all, the
+  <code>mix_bilinear()</code> function only supports floats and not vectors.
+  Secondly, we need to figure out the values for <code>t_horz</code> and
+  <code>t_vert</code>. The latter is fairly straightforward, as the blend
+  weights are directly correlated to how much the sample point is offset from
+  the center of the bottom left closest pixel.
+</p>
+
+<p>
+<pre><code class="language-python">bl_center = Vec2(
+    icoord_bl[0] + .5,
+    icoord_bl[1] + .5
+)
+bilinear_offs: Vec2 = sample_point - bl_center
+
+col: Vec3 = mix_bilinear(
+    col_bl,
+    col_br,
+    col_tl,
+    col_tr,
+    t_horz=bilinear_offs.x,
+    t_vert=bilinear_offs.y
+)</code></pre>
+</p>
+
+<p>
+  Let's now add new versions of <code>mix_bilinear()</code> and
+  <code>mix()</code> that work with vectors.
+</p>
+
+<p>
+<pre><code class="language-python">def mix(a: float, b: float, t: float) -> float:
+    return a + t * (b - a)
+
+
+def mix_vec2(a: Vec2, b: Vec2, t: float) -> Vec2:
+    return a + Vec2.scalar(t) * (b - a)
+
+
+def mix_vec3(a: Vec3, b: Vec3, t: float) -> Vec3:
+    return a + Vec3.scalar(t) * (b - a)
+
+
+def mix_bilinear(
+    bl: float,  # value at the bottom left
+    br: float,  # bottom right
+    tl: float,  # top left
+    tr: float,  # top right
+    t_horz: float,  # blend weight from left to right
+    t_vert: float  # blend weight from bottom to top
+) -> float:
+    return mix(
+        mix(bl, br, t_horz),
+        mix(tl, tr, t_horz),
+        t_vert
+    )
+
+
+def mix_vec2_bilinear(
+    bl: Vec2,  # value at the bottom left
+    br: Vec2,  # bottom right
+    tl: Vec2,  # top left
+    tr: Vec2,  # top right
+    t_horz: float,  # blend weight from left to right
+    t_vert: float  # blend weight from bottom to top
+) -> float:
+    return mix_vec2(
+        mix_vec2(bl, br, t_horz),
+        mix_vec2(tl, tr, t_horz),
+        t_vert
+    )
+
+
+def mix_vec3_bilinear(
+    bl: Vec3,  # value at the bottom left
+    br: Vec3,  # bottom right
+    tl: Vec3,  # top left
+    tr: Vec3,  # top right
+    t_horz: float,  # blend weight from left to right
+    t_vert: float  # blend weight from bottom to top
+) -> float:
+    return mix_vec3(
+        mix_vec3(bl, br, t_horz),
+        mix_vec3(tl, tr, t_horz),
+        t_vert
+    )</code></pre>
+</p>
+
+<p>
+  Use the new <code>mix_vec3_bilinear()</code> function we just made.
+</p>
+
+<p>
+<pre><code class="language-python">col: Vec3 = mix_vec3_bilinear(
+    col_bl,
+    col_br,
+    col_tl,
+    col_tr,
+    t_horz=bilinear_offs.x,
+    t_vert=bilinear_offs.y
+)</code></pre>
+</p>
+
+<p>
+  If we now run the script, we'll get an error:
+</p>
+
+<p>
+<pre><code>  ... in texel_fetch
+    col_rgb8: tuple[int, int, int] = tex_data[idx]
+                                     ~~~~~~~~^^^^^
+IndexError: list index out of range</code></pre>
+</p>
+
+<p>
+  The error is telling us that we're trying to access the <code>tex_data</code>
+  list at an invalid index, like a negative index, or one that's larger to equal
+  to the number of elements. To understand why this is happening, imagine our
+  sample point is at (0.1, 0.1). If we try to get the integer coordinates of the
+  bottom left closest pixel using the method we're currently using, we'll get
+  (-1, -1), which is outside the boundaries of the image, and doesn't represent
+  a real pixel.
+</p>
+<p>
+  Graphics programmers have come up with several ways to deal with this, each
+  with its own use cases. These are called texture wrap modes. Common wrap modes
+  are "clamp to edge", "repeat" which is used for tiling, "mirror", and so on.
+  The simplest method is to, in the <code>texel_fetch()</code> function, check
+  if the integer coordinates have negative numbers or exceed the width and
+  height of the image, and if so, return a predefined color, like black, named
+  the edge color or the border color. This is sometimes called the "clamp to
+  border" method, as in, clamp to the border color. Let's implement that now.
+</p>
+
+<p>
+<pre><code>def texel_fetch(
+    tex: Image,
+    tex_data: list[tuple[int, int, int]],
+    icoord: tuple[int, int]
+) -> Vec3:
+    border_color = Vec3(0, 0, 1)
+    if icoord[0] < 0 or icoord[0] >= tex.width:
+        return border_color
+    if icoord[1] < 0 or icoord[1] >= tex.height:
+        return border_color
+
+    ...</code></pre>
+</p>
+
+<p>
+  People often use black as the border color, but I used blue to demonstrate
+  the effect this wrap mode has on the edges. Let's rerun the script and see
+  what we get.
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-tex-bilinear-clamp-border.png"
+  alt="stretched texture without a pixelated look thanks to bilinear interpolation, and a subtle blue tint on the edges"
+  title="stretched texture without a pixelated look thanks to bilinear interpolation, and a subtle blue tint on the edges"
+  style="width: 20rem;" />
+
+<p>
+  If we really zoom in on the edges:
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-tex-bilinear-clamp-border-blue-edge.png"
+  alt="blue tint on the edges" title="blue tint on the edges" style="width: 15rem;" />
+
+<p>
+  The blue edges will start to show themselves. To fix this, we can use another
+  commonly used wrap mode called "clamp to edge". This wrap mode clamps the
+  integer coordinates down to the [0, (width or height) - 1] range. Let's modify
+  <code>texel_fetch()</code> to use this method instead.
+</p>
+
+<p>
+<pre><code>def texel_fetch(
+    tex: Image,
+    tex_data: list[tuple[int, int, int]],
+    icoord: tuple[int, int]
+) -> Vec3:
+    if icoord[0] < 0:
+        icoord = (0, icoord[1])
+    if icoord[0] >= tex.width:
+        icoord = (tex.width - 1, icoord[1])
+
+    if icoord[1] < 0:
+        icoord = (icoord[0], 0)
+    if icoord[1] >= tex.height:
+        icoord = (icoord[0], tex.height - 1)
+
+    idx = icoord_to_idx(
+        icoord[0],
+        icoord[1],
+        tex.width
+    )
+
+    col_rgb8: tuple[int, int, int] = tex_data[idx]
+    return Vec3(
+        col_rgb8[0] / 255.,
+        col_rgb8[1] / 255.,
+        col_rgb8[2] / 255.
+    )</code></pre>
+</p>
+
+<p>
+  Rerun the script, and we'll get this:
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-tex-bilinear-clamp-edge.png"
+  alt="stretched texture without a pixelated look thanks to bilinear interpolation"
+  title="stretched texture without a pixelated look thanks to bilinear interpolation" style="width: 20rem;" />
+
+<p>
+  And the edges are as clean as can be!
+</p>
+
+<p>
+  In the next article, we'll explore interesting effects that can be achieved
+  by manipulating our sample point.
+</p>
+      <div class="article-nav-container"><a class="prev-article-link" href="textured-quad.html" title="Previous article: Textures">← Textures</a>
+<a class="next-article-link" href="domain-transformations.html" title="Next article: Domain Transformations">Domain Transformations →</a>
+</div>
+    </article>
+
+    <footer>
+  <a class="social-link" href="https://github.com/bean-mhm" title="My GitHub Page" target="_blank">
+    <img class="social-icon" src="../../assets/images/github-mark-white.svg" />
+  </a>
+  <a class="social-link" href="https://youtube.com/@bean_mhm" title="My YouTube Channel" target="_blank">
+    <img class="social-icon" src="../../assets/images/yt_icon_mono_dark.svg" />
+  </a>
+  <a class="social-link" href="https://www.shadertoy.com/user/beans_please" title="My Shadertoy Account" target="_blank">
+    <img class="social-icon-long" src="../../assets/images/shadertoy_logo_white.svg" />
+  </a>
+</footer>
+  </main>
+
+  <script>hljs.highlightAll();</script>
+</body>
+
+</html>
