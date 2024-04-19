@@ -68,6 +68,18 @@
 </p>
 
 <p>
+  Functions can also take vectors as inputs and return vectors as their output,
+  and they don't need to have the same dimensionality. Here's a function that
+  takes in a single number and returns a 2D vector:
+</p>
+
+<img src="../../assets/images/articles/function-1d-2dout.png"
+  alt="a function that takes in a scalar and outputs a 2D vector"
+  title="a function that takes in a scalar and outputs a 2D vector" style="width: 24rem;" />
+
+<h2>Definition</h2>
+
+<p>
   Here's the definition of a function copied straight from Wikipedia:
 </p>
 
@@ -84,15 +96,47 @@
   set of all real numbers.
 </p>
 
+<h2>Pure Functions</h2>
+
 <p>
-  Functions can also take vectors as inputs and return vectors as their output,
-  and they don't need to have the same dimensionality. Here's a function that
-  takes in a single number and returns a 2D vector:
+  There is a major difference between functions in mathematics and functions
+  in programming. Functions in programming can (but don't have to) read from and
+  write to external variables called the state, but functions in mathematics can
+  only ever give an output based on their input and nothing else. These are
+  called pure functions. If you keep giving the same input to a pure function,
+  you'll always get the same output, but this isn't the case for functions in
+  programming languages.
 </p>
 
-<img src="../../assets/images/articles/function-1d-2dout.png"
-  alt="a function that takes in a scalar and outputs a 2D vector"
-  title="a function that takes in a scalar and outputs a 2D vector" style="width: 24rem;" />
+<p>
+  Here's a pure function in Python:
+</p>
+
+<p>
+<pre><code>def some_function(a: int, b: int) -> int:
+    return a + b</code></pre>
+</p>
+
+<p>
+  And an impure one:
+</p>
+
+<p>
+<pre><code># global variable outside the function (state)
+counter: int = 0
+
+def some_function(a: int) -> int:
+      global counter
+
+      # write to external variable (state)
+      counter += 1
+
+      # file input/output (state)
+      counter_file.write(counter)
+
+      # read from external variable
+      return counter + a</code></pre>
+</p>
 
 <h2>Visualizing Functions</h2>
 <p>

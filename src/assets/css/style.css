@@ -249,3 +249,8 @@ p+img {
   color: inherit;
   text-decoration-color: inherit;
 }
+
+video {
+  max-width: 100%;
+  height: auto;
+}
