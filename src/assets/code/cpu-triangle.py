@@ -367,6 +367,9 @@ for y in range(HEIGHT):
                 + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
                 + (Vec2.scalar(bary.z) * tri.v_uv[2])
 
+            # nonlinear transformation
+            interp_uv.x *= interp_uv.x
+
             sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
 
             icoord_bl = (

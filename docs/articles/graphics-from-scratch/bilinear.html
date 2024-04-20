@@ -506,7 +506,7 @@ for y in range(HEIGHT):
 </p>
 
 <p>
-<pre><code>  ... in texel_fetch
+<pre><code class="language-plaintext">  ... in texel_fetch
     col_rgb8: tuple[int, int, int] = tex_data[idx]
                                      ~~~~~~~~^^^^^
 IndexError: list index out of range</code></pre>
@@ -535,7 +535,7 @@ IndexError: list index out of range</code></pre>
 </p>
 
 <p>
-<pre><code>def texel_fetch(
+<pre><code class="language-python">def texel_fetch(
     tex: Image,
     tex_data: list[tuple[int, int, int]],
     icoord: tuple[int, int]
@@ -575,7 +575,7 @@ IndexError: list index out of range</code></pre>
 </p>
 
 <p>
-<pre><code>def texel_fetch(
+<pre><code class="language-python">def texel_fetch(
     tex: Image,
     tex_data: list[tuple[int, int, int]],
     icoord: tuple[int, int]
