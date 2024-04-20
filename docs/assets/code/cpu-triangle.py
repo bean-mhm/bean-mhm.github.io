@@ -28,6 +28,7 @@ class Vec2:
     def __iadd__(self, other):
         self.x += other.x
         self.y += other.y
+        return self
 
     def __sub__(self, other):
         return Vec2(self.x - other.x, self.y - other.y)
@@ -35,6 +36,7 @@ class Vec2:
     def __isub__(self, other):
         self.x -= other.x
         self.y -= other.y
+        return self
 
     def __mul__(self, other):
         return Vec2(self.x * other.x, self.y * other.y)
@@ -42,6 +44,7 @@ class Vec2:
     def __imul__(self, other):
         self.x *= other.x
         self.y *= other.y
+        return self
 
     def __truediv__(self, other):
         return Vec2(self.x / other.x, self.y / other.y)
@@ -49,6 +52,7 @@ class Vec2:
     def __idiv__(self, other):
         self.x /= other.x
         self.y /= other.y
+        return self
 
     def __neg__(self):
         return Vec2(-self.x, -self.y)
@@ -75,6 +79,7 @@ class Vec3:
         self.x += other.x
         self.y += other.y
         self.z += other.z
+        return self
 
     def __sub__(self, other):
         return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
@@ -83,6 +88,7 @@ class Vec3:
         self.x -= other.x
         self.y -= other.y
         self.z -= other.z
+        return self
 
     def __mul__(self, other):
         return Vec3(self.x * other.x, self.y * other.y, self.z * other.z)
@@ -91,6 +97,7 @@ class Vec3:
         self.x *= other.x
         self.y *= other.y
         self.z *= other.z
+        return self
 
     def __truediv__(self, other):
         return Vec3(self.x / other.x, self.y / other.y, self.z / other.z)
@@ -99,6 +106,7 @@ class Vec3:
         self.x /= other.x
         self.y /= other.y
         self.z /= other.z
+        return self
 
     def __neg__(self):
         return Vec3(-self.x, -self.y, -self.z)
@@ -121,6 +129,47 @@ class Triangle:
 
     def cart_to_bary(self, p: Vec2) -> Vec3:
         return cart_to_bary(p, self.v[0], self.v[1], self.v[2])
+
+
+class Mat2:
+    e11: float
+    e12: float
+    e21: float
+    e22: float
+
+    def __init__(self, e11: float, e12: float, e21: float, e22: float) -> None:
+        self.e11 = e11
+        self.e12 = e12
+        self.e21 = e21
+        self.e22 = e22
+
+    def __mul__(self, other):
+        # other is a scalar
+        if isinstance(other, float):
+            return Mat2(
+                other * self.e11,
+                other * self.e12,
+                other * self.e21,
+                other * self.e22
+            )
+
+        # other is a Vec2
+        if isinstance(other, Vec2):
+            return Vec2(
+                (self.e11 * other.x) + (self.e12 * other.y),
+                (self.e21 * other.x) + (self.e22 * other.y)
+            )
+
+        # other is another Mat2
+        if isinstance(other, Mat2):
+            return Mat2(
+                (self.e11 * other.e11) + (self.e12 * other.e21),
+                (self.e11 * other.e12) + (self.e12 * other.e22),
+                (self.e21 * other.e11) + (self.e22 * other.e21),
+                (self.e21 * other.e12) + (self.e22 * other.e22)
+            )
+
+        raise TypeError('unsupported type for matrix multiplication')
 
 
 # |a| * |b| * sin(theta)
@@ -239,6 +288,15 @@ def texel_fetch(
         col_rgb8[0] / 255.,
         col_rgb8[1] / 255.,
         col_rgb8[2] / 255.
+    )
+
+
+def rotate(angle: float) -> Mat2:
+    s: float = math.sin(angle)
+    c: float = math.cos(angle)
+    return Mat2(
+        c, -s,
+        s, c
     )
 
 

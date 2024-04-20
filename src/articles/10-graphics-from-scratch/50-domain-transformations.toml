@@ -1,8 +1,0 @@
-article_id = "domain-transformations"
-article_title = "Domain Transformations"
-article_author = "$-blog_author-$"
-article_date = "2024-04-11"
-article_visible = true
-article_contents = "$--load--$(\"50-domain-transformations.html\")"
-
-[vars]

@@ -1,0 +1,8 @@
+article_id = "domain-warping"
+article_title = "Domain Warping"
+article_author = "$-blog_author-$"
+article_date = "2024-04-11"
+article_visible = true
+article_contents = "$--load--$(\"50-domain-warping.html\")"
+
+[vars]

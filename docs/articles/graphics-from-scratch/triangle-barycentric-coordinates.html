@@ -185,6 +185,7 @@ v2 = Vec2(64, 48)</code></pre>
         self.x += other.x
         self.y += other.y
         self.z += other.z
+        return self
 
     def __sub__(self, other):
         return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
@@ -193,6 +194,7 @@ v2 = Vec2(64, 48)</code></pre>
         self.x -= other.x
         self.y -= other.y
         self.z -= other.z
+        return self
 
     def __mul__(self, other):
         return Vec3(self.x * other.x, self.y * other.y, self.z * other.z)
@@ -201,6 +203,7 @@ v2 = Vec2(64, 48)</code></pre>
         self.x *= other.x
         self.y *= other.y
         self.z *= other.z
+        return self
 
     def __truediv__(self, other):
         return Vec3(self.x / other.x, self.y / other.y, self.z / other.z)
@@ -209,6 +212,7 @@ v2 = Vec2(64, 48)</code></pre>
         self.x /= other.x
         self.y /= other.y
         self.z /= other.z
+        return self
 
     def __neg__(self):
         return Vec3(-self.x, -self.y, -self.z)</code></pre>

@@ -146,6 +146,7 @@ for i in range(N_PIXELS):
     def __iadd__(self, other):
         self.x += other.x
         self.y += other.y
+        return self
 
     def __sub__(self, other):
         return Vec2(self.x - other.x, self.y - other.y)
@@ -153,6 +154,7 @@ for i in range(N_PIXELS):
     def __isub__(self, other):
         self.x -= other.x
         self.y -= other.y
+        return self
 
     def __mul__(self, other):
         return Vec2(self.x * other.x, self.y * other.y)
@@ -160,13 +162,18 @@ for i in range(N_PIXELS):
     def __imul__(self, other):
         self.x *= other.x
         self.y *= other.y
+        return self
 
     def __truediv__(self, other):
         return Vec2(self.x / other.x, self.y / other.y)
 
     def __idiv__(self, other):
         self.x /= other.x
-        self.y /= other.y</code></pre>
+        self.y /= other.y
+        return self
+
+    def __neg__(self):
+        return Vec2(-self.x, -self.y)</code></pre>
 </p>
 
 <p>

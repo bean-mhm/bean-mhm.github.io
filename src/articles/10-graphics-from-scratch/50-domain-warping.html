@@ -1,0 +1,486 @@
+$--load--$("category-note.html")
+
+<p>
+  Here's the graph of a sine function:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/desmos-sinx.png" alt="sin(x) graphed with Desmos"
+  title="sin(x) graphed with Desmos" style="width: 52rem;" />
+
+<p>
+  Now, how do you think the graph would change if we multiplied <code>x</code>
+  by some number <code>a</code> before feeding it to the sine function?
+  Conveniently, Desmos provides us with sliders for adjusting variables and
+  seeing how the graph reacts in real time.
+</p>
+
+<p>
+  <video controls width="400" style="width: 50rem;">
+    <source src="$--root_path--$/assets/images/articles/desmos-sinx-input-scaling.mp4" type="video/mp4" />
+    <a href="$--root_path--$/assets/images/articles/desmos-sinx-input-scaling.mp4">Download video</a>
+  </video>
+</p>
+
+<p>
+  Cool, so scaling the input scales the graph horizontally. Note how the larger
+  the input scale, the smaller (more squashed) the graph gets in the horizontal
+  direction.
+</p>
+
+<p>
+  What about adding some offset <code>b</code> to the input?
+</p>
+
+<p>
+  <video controls width="400" style="width: 50rem;">
+    <source src="$--root_path--$/assets/images/articles/desmos-sinx-input-offset.mp4" type="video/mp4" />
+    <a href="$--root_path--$/assets/images/articles/desmos-sinx-input-offset.mp4">Download video</a>
+  </video>
+</p>
+
+<p>
+  Adding a positive offset to the input shifts the graph to the left, and vice
+  versa. In other words, offsetting the input to the right of the number line
+  moves the graph to the left. Pay attention to how transforming the input in
+  any way transforms the graph in the opposite way. We can call these operations
+  domain transformations, domain distortion, domain warping, or domain
+  manipulation, because they modify the input before passing it to the actual
+  function.
+</p>
+
+<p>
+  If we scale the output, however, it'll scale the graph in the vertical
+  direction with a direct relationship, and the same goes for offsetting the
+  output. I call these output transformations.
+</p>
+
+<p>
+  <video controls width="400" style="width: 50rem;">
+    <source src="$--root_path--$/assets/images/articles/desmos-sinx-output-transform.mp4" type="video/mp4" />
+    <a href="$--root_path--$/assets/images/articles/desmos-sinx-output-transform.mp4">Download video</a>
+  </video>
+</p>
+
+<h2>Texture Coordinates</h2>
+<p>
+  As discussed in
+  <a href="$--prev_article_path--$" title="$--prev_article_title--$">the previous article</a>,
+  a texture sampler can be thought of as a function that takes in a point and
+  returns the interpolated color of a texture at that point. This means we can
+  apply transformations on the input point and see the opposite effect in the
+  output, just like with the 1D case above.
+</p>
+<p>
+  Let's start by scaling the input. Right after we calculate
+  <code>interp_uv</code> in the render block, we'll scale it up by a factor
+  of 3 and observe how the output changes.
+</p>
+
+<p>
+<pre><code>interp_uv: Vec2 = \
+    (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+    + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+    + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+# scale
+interp_uv *= Vec2.scalar(3)
+
+sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)</code></pre>
+</p>
+
+<p>
+  Rerun the script, and you should get something like the following.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-scaled-input.png"
+  alt="texture scaled down by a factor of three" title="texture scaled down by a factor of three"
+  style="width: 24rem;" />
+
+<p>
+  Interestingly, the output gets scaled down toward the top left corner. This
+  makes sense because the origin (the zero point) of our texture coordinates
+  is at the top left.
+</p>
+
+<h2>The Order Is Reversed</h2>
+<p>
+  Let's try centering the texture content by offsetting the UV coordinates by
+  -1/3 units.
+</p>
+
+<p>
+<pre><code># scale
+interp_uv *= Vec2.scalar(3)
+
+# offset
+interp_uv -= Vec2.scalar(1. / 3)</code></pre>
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-scaled-input-wrong-centered.png"
+  alt="texture content at the wrong position instead of the center"
+  title="texture content at the wrong position instead of the center" style="width: 24rem;" />
+
+<p>
+  Uh, yeah... that doesn't look like it's centered. This illustrates an
+  important property of domain transformations: not only is the output
+  transformed in the opposite way than that of the input, but the order of the
+  individual transformations we apply to the input is also reversed in the
+  output. If you first rotate the input clockwise and then move it up, the
+  output will first move down and <em>then</em> rotate counterclockwise. In our
+  case, we want to first scale the output down by a factor of 3 and then offset
+  it by 1/3 units in UV space, so we'll need to first offset the UV coordinates
+  by -1/3 units and <em>then</em> scale them up by a factor of 3.
+</p>
+
+<p>
+<pre><code># offset
+interp_uv -= Vec2.scalar(1. / 3)
+
+# scale
+interp_uv *= Vec2.scalar(3)</code></pre>
+</p>
+
+<p>
+  Let's rerun the script and see what we get.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-scaled-input-centered.png"
+  alt="texture content properly centered" title="texture content properly centered" style="width: 24rem;" />
+
+<p>
+  Yep, that looks more centered.
+</p>
+
+<h2>Rotation</h2>
+<p>
+  At this point, you should be able to deduce that rotating the input clockwise
+  should rotate the output counterclockwise, and vice versa. The easiest way to
+  rotate 2D and 3D vectors is to use linear transformations by changing the
+  basis vectors of our coordinate system. This is where I have to mention
+  <a href="https://youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank">
+    3Blue1Brown's amazing video tutorial series on linear algebra
+  </a> again. Seriously, if you haven't watched it yet, do it!
+</p>
+<p>
+  From now on, I'll be assuming you have basic knowledge of matrices and linear
+  transformations and have watched 3Blue1Brown's series. Let's create a new
+  class in the classes section for 2x2 matrices and call it <code>Mat2</code>.
+</p>
+
+<p>
+<pre><code>class Mat2:
+    e11: float
+    e12: float
+    e21: float
+    e22: float
+
+    def __init__(self, e11: float, e12: float, e21: float, e22: float) -> None:
+        self.e11 = e11
+        self.e12 = e12
+        self.e21 = e21
+        self.e22 = e22</code></pre>
+</p>
+
+<p>
+  As a reminder, matrix element notation contains two digits where the first one
+  is the row index starting from 1 and the second one is the column index also
+  starting from 1. If you pay attention to the order of the elements in the
+  class, you'll notice that we go through the first row containing elements 11
+  and 12, then we continue down to the second row which contains elements 21 and
+  22. This is called a row-major matrix implementation and it matters because
+  the way things are organized in memory and how we access them directly impact
+  performance. Some libraries and shading languages use column-major
+  implementations, so you should be careful to place the elements and operations
+  (like multiplication) in the correct order.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/mat2-elements.png"
+  alt="a 2x2 matrix with its elements labeled e11, e12, e21, e22"
+  title="a 2x2 matrix with its elements labeled e11, e12, e21, e22" style="width: 20rem;" />
+
+<p>
+  Next, we'll overload the multiplication operator for <code>Mat2</code>. Now,
+  a 2x2 matrix can be multiplied by several things:
+</p>
+
+<p>
+<ul>
+  <li>a scalar,</li>
+  <li>a 2D vector treated as a 2x1 matrix,</li>
+  <li>another 2x2 matrix,</li>
+  <li>or a 2xN matrix where N &gt; 2.</li>
+</ul>
+</p>
+
+<p>
+  We'll only implement the first three cases as those are the most common.
+  Remember that order matters in matrix multiplication, so if we were to
+  multiply something by a <code>Mat2</code> instead of multiplying
+  <code>Mat2</code> by something, there would be more cases to cover. Anyhow,
+  let's implement the first case. Since Python is a dynamically typed language,
+  we're not immediately sure what type we're dealing with, but we can use the
+  built-in <code>isinstance()</code> function to check if an object has a
+  certain type, in this case, <code>float</code>.
+</p>
+
+<p>
+<pre><code>class Mat2:
+    ...
+
+    def __mul__(self, other):
+        # other is a scalar
+        if isinstance(other, float):
+            return Mat2(
+                other * self.e11,
+                other * self.e12,
+                other * self.e21,
+                other * self.e22
+            )</code></pre>
+</p>
+
+<p>
+  Let's now implement the other two cases we want to cover. We'll also raise an
+  error if the type isn't of the three we chose to support.
+</p>
+
+<p>
+<pre><code>class Mat2:
+    ...
+
+    def __mul__(self, other):
+        # other is a scalar
+        if isinstance(other, float):
+            return Mat2(
+                other * self.e11,
+                other * self.e12,
+                other * self.e21,
+                other * self.e22
+            )
+
+        # other is a Vec2
+        if isinstance(other, Vec2):
+            return Vec2(
+                (self.e11 * other.x) + (self.e12 * other.y),
+                (self.e21 * other.x) + (self.e22 * other.y)
+            )
+
+        # other is another Mat2
+        if isinstance(other, Mat2):
+            return Mat2(
+                (self.e11 * other.e11) + (self.e12 * other.e21),
+                (self.e11 * other.e12) + (self.e12 * other.e22),
+                (self.e21 * other.e11) + (self.e22 * other.e21),
+                (self.e21 * other.e12) + (self.e22 * other.e22)
+            )
+
+        raise TypeError('unsupported type for matrix multiplication')</code></pre>
+</p>
+
+<p>
+  We are now ready to make a function that generates a 2x2 rotation matrix for
+  the specified angle in radians, so let's add it in the functions section.
+</p>
+
+<p>
+<pre><code>def rotate(angle: float) -> Mat2:
+    return Mat2(
+        math.cos(angle), -math.sin(angle),
+        math.sin(angle), math.cos(angle)
+    )</code></pre>
+</p>
+
+<p>
+  This implementation is technically correct, but it could easily be faster. The
+  problem is that <code>math.cos()</code> and <code>math.sin()</code> are
+  generally slow functions, and we're calling them twice while we could reuse
+  their values:
+</p>
+
+<p>
+<pre><code>def rotate(angle: float) -> Mat2:
+    s: float = math.sin(angle)
+    c: float = math.cos(angle)
+    return Mat2(
+        c, -s,
+        s, c
+    )</code></pre>
+</p>
+
+<p>
+  Back in the render section, we'll rotate the UV coordinates by about 20
+  degrees before offsetting and scaling them, which will have the effect of
+  rotating the output after scaling and offsetting it. As a side note, an angle
+  of 20 degrees corresponds to around 0.35 radians.
+</p>
+
+<p>
+<pre><code># rotate
+interp_uv = rotate(.35) * interp_uv
+
+# offset
+interp_uv -= Vec2.scalar(1. / 3)
+
+# scale
+interp_uv *= Vec2.scalar(3)</code></pre>
+</p>
+
+<p>
+  If we rerun the script now, we'll get the following.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-rotated-input.png"
+  alt="texture rotated clockwise around the top left" title="texture rotated clockwise around the top left"
+  style="width: 20rem;" />
+
+<p>
+  Some of you were probably expecting the output to be rotated around the
+  center, but without any manual repositioning, rotations are centered around
+  the origin which is at the top left in this case. More on this below. You
+  might also be wondering why it's rotated counterclockwise. We rotated the
+  input counterclockwise, so shouldn't the output be rotated clockwise instead?
+  Well, it is. The output is actually rotated clockwise, we're just viewing
+  it upside down because the Y coordinate in our texture starts from the top.
+</p>
+
+<p>
+  In 2D, if we want to rotate or scale a point around another point, we need to
+  temporarily make that other point the origin. Let's call that point the anchor
+  point. What we basically need to do is to subtract the coordinates of the
+  anchor point from the point we want to transform. This has the effect of
+  changing the origin to the anchor point, because if our original point was
+  already on the anchor point, then it'll become (0, 0) after the subtraction.
+  Once we're in this new coordinate system where the anchor point is the origin,
+  we can do our transform(s) and finally go back to the real origin by adding
+  back the coordinates of the anchor point. In this case, the anchor point is
+  the center which is (0.5, 0.5) in the normalized UV space.
+</p>
+
+<p>
+<pre><code># rotate
+interp_uv -= Vec2.scalar(.5)
+interp_uv = rotate(.35) * interp_uv
+interp_uv += Vec2.scalar(.5)</code></pre>
+</p>
+
+<p>
+  Be careful not to confuse these temporary offsets with real domain
+  transformations that have the opposite effect on the output and are applied
+  in reverse order. You should treat all three lines as a single transformation
+  that rotates the input around the center by 20 degrees counterclockwise, which
+  effectively rotates the output around the center by 20 degrees clockwise.
+</p>
+
+<p>
+  Let's rerun the script and see what we get.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-rotated-centered-input.png"
+  alt="texture rotated clockwise around the center" title="texture rotated clockwise around the center"
+  style="width: 20rem;" />
+
+<p>
+  Awesome! You now know how to apply basic linear transformations on textures.
+  Feel free to try multiplying arbitrary 2x2 matrices by <code>interp_uv</code>
+  to apply other types of linear transformations, like skewing, or ones that
+  are the product of several transformations.
+</p>
+
+<h2>Manual Tiling</h2>
+<p>
+  Did you know you can replicate the "repeat" wrap mode by manually wrapping the
+  UV coordinates in the 0 to 1 range? You should normally rely on the texture
+  sampler to do this for you, but it helps to learn how it can be done. After
+  all the transformations we apply to <code>interp_uv</code>, we'll use the
+  <code>math.modf()</code> function to wrap it in the [0, 1) range. This
+  function returns a tuple of two floats where the first one contains the
+  fractional part and the second one contains the integer part.
+</p>
+
+<p>
+<pre><code># rotate
+...
+
+# offset
+...
+
+# scale
+...
+
+# repeat
+interp_uv.x = math.modf(interp_uv.x)[0]
+interp_uv.y = math.modf(interp_uv.y)[0]</code></pre>
+</p>
+
+<p>
+  If we run this, we'll get the following result.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-manual-repeat-wrong.png"
+  alt="texture tiled incorrectly with some empty areas" title="texture tiled incorrectly with some empty areas"
+  style="width: 20rem;" />
+
+<p>
+  It seems like negative UV values aren't being wrapped properly. If we look at
+  the documentation for <code>math.modf()</code>, we'll realize that the output
+  values carry the sign of the input, so if the input is negative, the output
+  will be negative too. We can fix this by adding 1 to the output of the
+  function if it's negative.
+</p>
+
+<p>
+<pre><code># repeat
+interp_uv.x = math.modf(interp_uv.x)[0]
+interp_uv.y = math.modf(interp_uv.y)[0]
+if interp_uv.x < 0:
+    interp_uv.x += 1
+if interp_uv.y < 0:
+    interp_uv.y += 1</code></pre>
+</p>
+
+<p>
+  If we rerun the script, this is what we'll get:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-manual-repeat.png" alt="texture tiled properly"
+  title="texture tiled properly" style="width: 20rem;" />
+
+<h2>Aspect Ratio</h2>
+<p>
+  I think it's time we finally fix the aspect ratio of our quad to match that of
+  the texture, but first, let's undo all of the transformations we have applied.
+</p>
+
+<p>
+<pre><code>...
+
+interp_uv: Vec2 = \
+    (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+    + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+    + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+# no transformations
+
+sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
+
+...</code></pre>
+</p>
+
+<p>
+  Our texture file has 60 by 90 pixels, so the width-to-height ratio is 2:3 or
+  0.66666..., but our quad, which fills the entirety of the output image, is
+  320 by 240 pixels, so its aspect ratio is 4:3 or 1.33333..., so it needs to
+  be scaled in the horizontal direction by (2/3) / (4/3) which gives us 0.5.
+  Let's go back to the triangle list and modify the vertices of the quad to make
+  it half as wide.
+</p>
+
+<h2>Nonlinear Transformations</h2>
+<p>
+  So far, we've only looked at linear transformations, but wouldn't it be cool
+  if we could bend the image in different ways?
+</p>
+<p>
+  Here's a fun idea. What if we scale V (the horizontal component of UV) more
+  aggressively as it goes to the right? In other words, let's multiply it by
+  itself.
+</p>

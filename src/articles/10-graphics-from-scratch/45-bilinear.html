@@ -407,6 +407,66 @@ def mix_vec3_bilinear(
 </p>
 
 <p>
+  With that, the render block should look something like the following.
+</p>
+
+<p>
+<pre><code class="language-python"># render
+for y in range(HEIGHT):
+    for x in range(WIDTH):
+        p = Vec2(x + .5, y + .5)
+
+        col = Vec3(.1, .1, .1)
+        for tri in tris:
+            bary: Vec3 = tri.cart_to_bary(p)
+            if bary_is_outside(bary):
+                continue
+
+            interp_col: Vec3 = \
+                (Vec3.scalar(bary.x) * tri.v_col[0]) \
+                + (Vec3.scalar(bary.y) * tri.v_col[1]) \
+                + (Vec3.scalar(bary.z) * tri.v_col[2])
+
+            interp_uv: Vec2 = \
+                (Vec2.scalar(bary.x) * tri.v_uv[0]) \
+                + (Vec2.scalar(bary.y) * tri.v_uv[1]) \
+                + (Vec2.scalar(bary.z) * tri.v_uv[2])
+
+            sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
+
+            icoord_bl = (
+                int(math.floor(sample_point.x - .5)),
+                int(math.floor(sample_point.y - .5))
+            )
+            icoord_br = (icoord_bl[0] + 1, icoord_bl[1] + 0)
+            icoord_tl = (icoord_bl[0] + 0, icoord_bl[1] + 1)
+            icoord_tr = (icoord_bl[0] + 1, icoord_bl[1] + 1)
+
+            col_bl: Vec3 = texel_fetch(tex, tex_data, icoord_bl)
+            col_br: Vec3 = texel_fetch(tex, tex_data, icoord_br)
+            col_tl: Vec3 = texel_fetch(tex, tex_data, icoord_tl)
+            col_tr: Vec3 = texel_fetch(tex, tex_data, icoord_tr)
+
+            bl_center = Vec2(
+                icoord_bl[0] + .5,
+                icoord_bl[1] + .5
+            )
+            bilinear_offs: Vec2 = sample_point - bl_center
+
+            col: Vec3 = mix_vec3_bilinear(
+                col_bl,
+                col_br,
+                col_tl,
+                col_tr,
+                t_horz=bilinear_offs.x,
+                t_vert=bilinear_offs.y
+            )
+
+        idx = icoord_to_idx(x, HEIGHT - y - 1, WIDTH)
+        buf[idx] = col</code></pre>
+</p>
+
+<p>
   If we now run the script, we'll get an error:
 </p>
 
