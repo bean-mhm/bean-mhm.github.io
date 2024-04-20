@@ -469,10 +469,123 @@ sample_point: Vec2 = interp_uv * Vec2(tex.width, tex.height)
   Our texture file has 60 by 90 pixels, so the width-to-height ratio is 2:3 or
   0.66666..., but our quad, which fills the entirety of the output image, is
   320 by 240 pixels, so its aspect ratio is 4:3 or 1.33333..., so it needs to
-  be scaled in the horizontal direction by (2/3) / (4/3) which gives us 0.5.
-  Let's go back to the triangle list and modify the vertices of the quad to make
-  it half as wide.
+  be scaled in the horizontal direction by (2/3) / (4/3) which is 0.5.
 </p>
+<p>
+  Let's go back to the triangle list and modify the vertices of the quad to make
+  it half as wide. The new width and height of the quad should be 160 by 240
+  pixels, which, indeed, have a ratio of 2:3.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/160x240quadtri.png"
+  alt="a 160 by 240 rectangle divided into two triangles at the left side of a bigger 320 by 240 rectangle"
+  title="a 160 by 240 rectangle divided into two triangles at the left side of a bigger 320 by 240 rectangle"
+  style="width: 25rem;" />
+
+<p>
+<pre><code># triangle list
+tris: list[Triangle] = []
+tris.append(Triangle(
+    v=(
+        Vec2(0, 0),  # bottom left
+        Vec2(160, 0),  # bottom right
+        Vec2(0, 240)  # top left
+    ),
+    v_col=(
+        Vec3(.1, .2, .9),
+        Vec3(.9, .4, .1),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(0, 1),
+        Vec2(1, 1),
+        Vec2(0, 0)
+    )
+))
+tris.append(Triangle(
+    v=(
+        Vec2(160, 0),  # bottom right
+        Vec2(160, 240),  # top right
+        Vec2(0, 240)  # top left
+    ),
+    v_col=(
+        Vec3(.9, .4, .1),
+        Vec3(.9, .1, .6),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(1, 1),
+        Vec2(1, 0),
+        Vec2(0, 0)
+    )
+))</code></pre>
+</p>
+
+<p>
+  If we rerun the script, we'll get the following.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-aspect.png"
+  alt="texture rendered with the correct aspect ratio onto a quad at the left side"
+  title="texture rendered with the correct aspect ratio onto a quad at the left side" style="width: 20rem;" />
+
+<p>
+  To center the quad, we just have to move it to the right by half the amount of
+  empty space left. The amount of empty space in the right side is 160 pixels,
+  so we should move the quad to the right by 80 pixels.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/160x240quadtri-centered.png"
+  alt="a 160 by 240 rectangle divided into two triangles at the center of a bigger 320 by 240 rectangle"
+  title="a 160 by 240 rectangle divided into two triangles at the center of a bigger 320 by 240 rectangle"
+  style="width: 25rem;" />
+
+<p>
+<pre><code># triangle list
+tris: list[Triangle] = []
+tris.append(Triangle(
+    v=(
+        Vec2(80, 0),  # bottom left
+        Vec2(240, 0),  # bottom right
+        Vec2(80, 240)  # top left
+    ),
+    v_col=(
+        Vec3(.1, .2, .9),
+        Vec3(.9, .4, .1),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(0, 1),
+        Vec2(1, 1),
+        Vec2(0, 0)
+    )
+))
+tris.append(Triangle(
+    v=(
+        Vec2(240, 0),  # bottom right
+        Vec2(240, 240),  # top right
+        Vec2(80, 240)  # top left
+    ),
+    v_col=(
+        Vec3(.9, .4, .1),
+        Vec3(.9, .1, .6),
+        Vec3(.2, .7, .1)
+    ),
+    v_uv=(
+        Vec2(1, 1),
+        Vec2(1, 0),
+        Vec2(0, 0)
+    )
+))</code></pre>
+</p>
+
+<p>
+  Run it again, and we'll get this:
+</p>
+
+<img src="$--root_path--$/assets/images/articles/cpu-tri-quad-tex-aspect-centered.png"
+  alt="texture rendered with the correct aspect ratio onto a quad at the center"
+  title="texture rendered with the correct aspect ratio onto a quad at the center" style="width: 20rem;" />
 
 <h2>Nonlinear Transformations</h2>
 <p>

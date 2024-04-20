@@ -309,9 +309,9 @@ for i in range(N_PIXELS):
 tris: list[Triangle] = []
 tris.append(Triangle(
     v=(
-        Vec2(0, 0),
-        Vec2(320, 0),
-        Vec2(0, 240)
+        Vec2(80, 0),  # bottom left
+        Vec2(240, 0),  # bottom right
+        Vec2(80, 240)  # top left
     ),
     v_col=(
         Vec3(.1, .2, .9),
@@ -326,9 +326,9 @@ tris.append(Triangle(
 ))
 tris.append(Triangle(
     v=(
-        Vec2(320, 0),
-        Vec2(320, 240),
-        Vec2(0, 240)
+        Vec2(240, 0),  # bottom right
+        Vec2(240, 240),  # top right
+        Vec2(80, 240)  # top left
     ),
     v_col=(
         Vec3(.9, .4, .1),
