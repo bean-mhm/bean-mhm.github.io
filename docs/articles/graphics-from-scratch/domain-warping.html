@@ -643,9 +643,40 @@ interp_uv.x *= interp_uv.x</code></pre>
   title="texture warped such that the right side is more squashed than the left side" style="width: 20rem;" />
 
 <p>
-  That actually looks quite interesting, but what would happen if we offsetted
-  V using a sine function based on U? Or, put simply, make V go up and down in
-  a smooth way as U changes.
+  That actually looks quite interesting, but what would happen if we instead
+  offsetted V using a sine function based on U? Or, put simply, make V wave up
+  and down as U changes.
+</p>
+
+<p>
+<pre><code class="language-python"># nonlinear transformation
+interp_uv.y += math.sin(interp_uv.x)</code></pre>
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-tex-nonlinear-sine-heavy.png"
+  alt="texture heavily warped in a wavy pattern" title="texture heavily warped in a wavy pattern"
+  style="width: 20rem;" />
+
+<p>
+  I think you would agree that the wave is a bit too strong. Let's bring down
+  the strength (amplitude) of the sine function by multiplying its output by a
+  number much smaller than 1. Let's also squash the wave by multiplying its
+  input (U) by a number larger than 1 (a domain transformation in a domain
+  transformation!).
+</p>
+
+<p>
+<pre><code class="language-python"># nonlinear transformation
+interp_uv.y += .02 * math.sin(30 * interp_uv.x)</code></pre>
+</p>
+
+<img src="../../assets/images/articles/cpu-tri-quad-tex-nonlinear-sine.png"
+  alt="texture warped in a wavy pattern" title="texture warped in a wavy pattern" style="width: 20rem;" />
+
+<p>
+  I hope you can see the power of domain transformations and how we can use them
+  to make images appear distorted. In the next article, we'll explore how we can
+  manipulate RGB colors.
 </p>
       <div class="article-nav-container"><a class="prev-article-link" href="functions.html" title="Previous article: Functions">← Functions</a>
 <a class="next-article-link" href="graphics-pipeline.html" title="Next article: The Graphics Pipeline">The Graphics Pipeline →</a>
