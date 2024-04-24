@@ -4,8 +4,8 @@ category_content_start = """
 """
 
 article_link_content = """
-<p>
-<a href="$--article_path--$" target="_blank">$--article_title--$</a>
+<p class="line-height-1-3">
+<a class="link-underline-hover-only" href="$--article_path--$" target="_blank">$--article_title--$</a>
 <br />
 <span class="small-detail">$--article_author--$ • $--article_date_alt--$</span>
 </p>
