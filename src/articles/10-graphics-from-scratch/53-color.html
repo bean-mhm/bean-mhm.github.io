@@ -7,9 +7,173 @@ $--load--$("category-note.html")
   closed.
 </p>
 
-<h2>It's... Psychophysical?</h2>
+<h2>Your Eyes Are Lying To You</h2>
 <p>
-  While the human vision does originally base its input on the strengths of
-  different wavelengths in the visible spectrum, it doesn't entirely depend on
-  it.
+  It's 2 AM. You're standing in an empty street, all quiet. You look at the
+  asphalt reflecting the deep orange color emitted from the street lights. You
+  look at the lights themselves, but they look yellow. Like, really bright
+  yellow. You take out your phone and realize the screen has an unusual blue
+  tint to it. You ignore it and keep using your phone for a couple minutes. You
+  put it back in your pocket and look at what's around. Everything suddenly
+  looks a lot more orange than it was before you used your phone. "Whatever",
+  you say and go back to the house. You turn off the lights and go to bed. It
+  gets real dark. So dark, you start seeing grainy dots. You're barely seeing
+  any colors now. You fall asleep.
 </p>
+<p>
+  It's morning. You get ready for work. You go to your car and realize you
+  haven't brought your briefcase. You go back to the house. There's now a weird
+  green tint all over your vision, and you can hardly see the objects in the
+  house. Back in your car, you look at the asphalt again. It's glowing like
+  crazy, reflecting the sun. You reach your workplace, so you park your car. You
+  look at the fuel level gauge. It too has a strange green tint to it. A few
+  seconds pass by. It now has a purple tint. What is going on?
+</p>
+<p>
+  You open Instagram, and the first reel you see is some goofy optical illusion.
+  You stare at it for 5 seconds. You look back at the fuel gauge. It's all
+  swirly now. You're going crazy. "How does the human vision work? Why is it
+  constantly changing based on what it sees?", you ask yourself, confused.
+</p>
+
+<h2>Color Models Are Just Models</h2>
+<p>
+  The above are just a few examples of how unpredictable the human vision is.
+  You can't derive formulas for it. You can't simulate it. It's one beast of a
+  system. That is to say, no color model is accurate. With full respect,
+  <a href="https://bottosson.github.io/posts/oklab/">Oklab</a>, a so-called
+  perceptual color space for image processing, is not a perceptual color space.
+  Nothing is. "Perceptually uniform" color spaces are <strong>not</strong>
+  perceptually uniform. They do provide useful ways to closely model the vision
+  of a so-called "standard observer" in a generalized manner, but your vision is
+  constantly changing. A greenish white wall might look slightly more red in
+  your left eye than your right eye. Spatial patterns affect colors. Patterns
+  that change over time affect how you perceive colors. The human vision depends
+  on a thousand different factors, and yet, all these perceptual color spaces
+  work with are 3 numbers for RGB.
+</p>
+<p>
+  Again, don't get me wrong. People who design these color spaces certainly know
+  a lot more than me, and they are aware of the fact that their models can never
+  be accurate. With all that, these models are still used to achieve acceptable
+  results in some color-related processes.
+</p>
+
+<h2>Spectral Power Distribution</h2>
+<p>
+  Although we can't accurately model the human vision in a mathematical or
+  algorithmic way, we can accurately model light itself, because unlike the
+  human vision which is psychophysical, light is a physical phenomenon. To
+  measure light is straightforward. On a basic level, we measure how strong
+  every wavelength is in the electromagnetic spectrum emitted by a light source,
+  or one reflected from a regular object. We call this a
+  <strong>spectral power distribution</strong>, or SPD in short. We usually only
+  care about the wavelengths we can see, called the visible spectrum.
+</p>
+
+<img src="$--root_path--$/assets/images/articles/spd-examples.png" alt="SPD examples" title="SPD examples"
+  style="width: 40rem; margin-bottom: calc(0.5 * var(--pico-typography-spacing-vertical));" />
+<p>
+  <em>
+    <a class="small-detail" href="https://www.paintingframesplus.com/painting-frames-plus-website-colors.php"
+      target="_blank">source</a>
+  </em>
+</p>
+
+<p>
+  The colors used in the examples above aren't accurate, but they're close.
+  You'd need laser-like emitters with really narrow bands to produce pure
+  wavelengths, but these color graphs are limited to what the average display
+  device can produce, which is pretty limited in terms of purity.
+</p>
+
+<p>
+  <canvas id="chart-0" style="width: 40rem;"></canvas>
+</p>
+
+<h2>Discrete SPDs</h2>
+<p>
+  It would be cool if we could store super detailed SPDs in our programs, but
+  computer memory is limited, so we need to spare some bytes. The usual way to
+  represent an SPD in memory is to use evenly spaced wavelengths. The visible
+  spectrum ranges from 380 nanometers to 750 nanometers, so we could, for
+  example, store the average light power in the [380, 390) nm range, then the
+  average power in [390, 400) nm, and so on up to [740, 750) nm.
+</p>
+
+<script src="$--root_path--$/assets/chart.js/chart.umd.js"></script>
+<script>
+  function valueOrDefault(value, defaultValue) {
+    return typeof value === 'undefined' ? defaultValue : value;
+  }
+
+  function random_numbers(config) {
+    var cfg = config || {};
+    var min = valueOrDefault(cfg.min, 0);
+    var max = valueOrDefault(cfg.max, 100);
+    var from = valueOrDefault(cfg.from, []);
+    var count = valueOrDefault(cfg.count, 8);
+    var decimals = valueOrDefault(cfg.decimals, 8);
+    var continuity = valueOrDefault(cfg.continuity, 1);
+    var dfactor = Math.pow(10, decimals) || 0;
+    var data = [];
+    var i, value;
+
+    for (i = 0; i < count; ++i) {
+      value = (from[i] || 0) + min + (max - min) * Math.random();
+      if (Math.random() <= continuity) {
+        data.push(Math.round(dfactor * value) / dfactor);
+      } else {
+        data.push(null);
+      }
+    }
+
+    return data;
+  }
+
+  const CHART_COLORS = {
+    red: '255, 99, 132',
+    orange: '255, 159, 64',
+    yellow: '255, 205, 86',
+    green: '75, 192, 192',
+    blue: '54, 162, 235',
+    purple: '153, 102, 255',
+    grey: '201, 203, 207'
+  };
+
+  const ctx = document.getElementById('chart-0');
+
+  const data = {
+    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
+    datasets: [
+      {
+        label: 'Dataset',
+        data: random_numbers({ count: 6, min: -100, max: 100 }),
+        borderColor: 'rgb(' + CHART_COLORS.red + ')',
+        backgroundColor: 'rgba(' + CHART_COLORS.red + ', 0.5)',
+        pointStyle: 'circle',
+        pointRadius: 10,
+        pointHoverRadius: 15
+      }
+    ]
+  };
+
+  const config = {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Chart.js Line Chart'
+        }
+      }
+    }
+  };
+
+  //new Chart(ctx, config);
+</script>
